@@ -1,0 +1,187 @@
+<template>
+  <b-container fluid="" style="background-color:#FFFFFF" class="bv-example-row">
+    <b-row cols="1" class="video-row" cols-xs="1" cols-sm="2" cols-md="3" cols-lg="3" cols-xl="4">
+      <b-col v-for="(value,index) in video" :key="index" class="video-col">
+        <div style="padding-left:0.5rem;padding-right:0.5rem">
+          <b-card no-body class="mb-2 mycard">
+            <b-row no-gutters>
+              <b-col>
+                <router-link tag="a" :to="{name:'article.articlepage',params:{id:value.ArticleId,lang:'zh'}}">
+                  <b-card-img-lazy
+                      v-bind:src="value.PicS"
+                      alt="Image"
+                      class="mycardimg">
+                  </b-card-img-lazy>
+                </router-link>
+              </b-col>
+            </b-row>
+            <b-row no-gutters>
+              <b-col>
+                <b-card-body>
+                  <b-card-text>
+                    <router-link tag="a" :to="{name:'article.articlepage',params:{id:value.ArticleId,lang:'zh'}}">
+                      <a class="mylink-title" v-html="value.Title"></a>
+                    </router-link>
+                    <router-link tag="a" :to="{name:'article.usercontent',params:{id:value.AuthorId,lang:'zh'}}">
+                      <lable class="mylink-author">{{value.Author}}&nbsp;</lable>
+                    </router-link>
+                    <label class="mylink-date">{{getArticleTime(value.ArticleTime, value.PastTime)}}</label>
+                  </b-card-text>
+                </b-card-body>
+              </b-col>
+            </b-row>
+          </b-card>
+        </div>
+      </b-col>
+    </b-row>
+  </b-container>
+</template>
+
+<script>
+import axios from "axios";
+
+export default {
+  name: 'ArticleThumbsGrid',
+  data () {
+    return {
+      video: {},
+      aspect: '16:9'
+    }
+  },
+  methods: {
+    getvideo:function (){
+      let vm = this
+      axios.get('/api/v1/getacat?page=1&count=10&cats=3&lang=zh',
+          {headers:{"Access-Control-Allow-Origin":"*"}
+          }).then(
+          function (response){
+            vm.video = response.data[0].ACS
+          }
+      );
+    },
+    getArticleTime:function(t, tp) {
+      if (tp > 86400) {
+        var newDate = new Date();
+        newDate.setTime(t * 1000);
+        return newDate.toLocaleString("chinese", { hour12: false }).substring(5,15);
+      } else {
+        if (tp < 60) {
+          return "<1min"
+        } else if (tp < 3600) {
+          let tp2 = tp / 60
+          return tp2+"mins"
+        } else {
+          let tp2 = tp / 3600
+          return tp2+"hours"
+        }
+      }
+    },
+    delHtmlTag:function(str) {
+      let s1 = str.replace(/<[^>]+>/g,"")
+      return s1
+    }
+  },
+  mounted :function() {
+    this.getvideo("Article", 3)
+  }
+}
+
+</script>
+
+<style scoped>
+.mycol {
+  padding-top: 0.5rem;
+  padding-left: 0rem;
+  padding-right: 0rem;
+  padding-bottom: 0.5rem;
+}
+.list-group.mylistgroup {
+  padding-bottom: 0.5rem;
+  border-bottom-style:solid;
+  border-color:#F7F7F7;
+  border-width:2px;
+}
+.list-group-item {
+  font-size: 14px;
+  padding: 0.6rem 1rem 0.6rem 1rem;
+  border: none;
+  background-color: #FFFFFF;
+}
+.list-group-item:first-child {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+.list-group-item:last-child {
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+.list-group-item:hover {
+  background-color: #F7F7F7;
+}
+.list-group-item-action:hover .list-group-item-action:focus {
+  background-color: #FFFFFF;
+}
+.myicon {
+  color: #004085;
+  margin-right: 0.6rem;
+}
+.title-text {
+  margin-left: 1rem;
+  font-size: 12px;
+  color: #004085;
+}
+.mb-2.mycard {
+  margin-top: 0.5rem;
+  border: 0px;
+  border-radius: 0rem;
+}
+.video-row {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  background-color: #F7F7F7;
+}
+.video-col {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.2rem;
+  background-color: #FFFFFF;
+}
+.mycardimg {
+  width: 100%;
+  border-radius: 0px;
+}
+.mylink-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #004085;
+  line-height: 20px;
+  margin-bottom: 0.3rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mylink-author {
+  font-size: 12px;
+  font-weight: bold;
+  color: #616161;
+  line-height: 12px;
+  margin-bottom: 0.3rem;
+}
+.mylink-date {
+  font-size: 12px;
+  color: #616161;
+  font-style: italic;
+  margin-bottom: 0.3rem;
+}
+.card-body {
+  padding-left: 0rem;
+  padding-right: 0rem;
+  padding-top: 0.2rem;
+  padding-bottom: 0.5rem;
+  background-color: #FFFFFF;
+  font-size: 14px;
+  color: #004085;
+}
+</style>

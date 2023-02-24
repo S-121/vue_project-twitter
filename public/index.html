@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!--suppress JSUnresolvedVariable -->
+<html lang="zh-Hans">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" href="" />
+    <meta
+            name="description"
+            content=""
+    />
+    <meta
+            name="keywords"
+            content=""
+    />
+    <!-- Social Share -->
+    <meta name="twitter:card" content="{{.bind_meta_twitter_card}}"/>
+    <meta name="twitter:site" content="@VOGGER"/>
+    <meta name="twitter:creator" content="@VOGGER"/>
+    <meta property="twitter:url" content="{{.bind_meta_twitter_url}}" />
+    <meta property="twitter:title" content="{{.bind_meta_twitter_title}}" />
+    <meta property="twitter:description" content="{{.bind_meta_twitter_desp}}" />
+    <meta property="og:url" content="{{.bind_meta_og_url}}" />
+    <meta property="og:title" content="{{.bind_meta_og_title}}" />
+    <meta property="og:description" content="{{.bind_meta_og_desc}}" />
+    <meta property="og:image" content="{{.bind_meta_og_img}}" />
+    <meta property="og:type"  content="article" />
+    <!-- Social Share End -->
+    <title>Vogger</title>
+    <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
+    />
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css"
+    />
+</head>
+<body>
+<noscript>
+    <strong
+    >We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work
+        properly without JavaScript enabled. Please enable it to
+        continue.</strong
+    >
+</noscript>
+<div id="app"></div>
+<!-- built files will be auto injected -->
+</body>
+</html>

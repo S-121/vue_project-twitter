@@ -1,0 +1,521 @@
+
+##########################################
+# normal return json format
+##########################################
+
+
+# {
+#   "Code": 0,          0:return correct;   1:return failed
+#   "Msg": "",          returned message, if Code=0, Msg will be empty normally
+#   "Body": {           returned infomation body
+#     ...
+#   }
+# }
+
+
+
+##########################################
+# user basic information
+##########################################
+
+
+
+###
+# get user basic information
+# it is different from another api "tweetuser", "tweetuser" using to get user infomation of tweet
+
+GET https://tweettest.vog.media/vapi/vgr1/userinfo  HTTP/1.1
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: elon.0oq4aek88w5yzzccekxmh7hgcgar699ycfina3irduxas9tln32j9mwja9x4ie43
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Uid": 1,
+#     "Username": "golden",
+#     "Email": "z@z.com",
+#     "DisplayName": "golden",
+#     "IsGroup": 1,                 >1 is user group, ==0 is user
+#     "GroupLTw": 2,                user group send tweet limit, minimun value of posted tweet
+#     "GroupLFol": 2,               user group send tweet limit, minimum value of follower
+#     "Avatar48": "2021/03/26/bcl3oybldq15xl5w1mkyrmt1i8yujnvz_48.jpg",
+#     "Avatar96": "2021/03/26/bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#     "Avatar400": "2021/03/26/bcl3oybldq15xl5w1mkyrmt1i8yujnvz_400.jpg",
+#     "Description": "this is my channel",
+#     "BannerPic": "this is banner url"
+#   }
+# }
+
+
+###
+# check password for changing password  (reserved)
+
+POST https://tweettest.vog.media/vapi/vgr1/checkpw  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+}
+
+
+###
+# change password
+# the process of change password: The user has logged in, enter the old password and confirm new password, and use this API to write the new password
+
+POST https://tweettest.vog.media/vapi/vgr1/changepw  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "pw": "123456",
+    "pwnew": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+}
+
+
+###
+# reset passrod
+# parameter Email suports email only
+# the process of reset password: The user enters the email, sends an email with confirm code, and then use confirm API
+
+
+POST https://tweettest.vog.media/vapi/vgr1/resetpw  HTTP/1.1
+Content-Type: application/json
+
+{
+    "Email": "zac@abc.com"
+}
+
+
+###
+# change email
+# change email must check password
+# mush have 5 second interval
+
+POST https://tweettest.vog.media/vapi/vgr1/changemail  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Email": "z@z.com",
+    "Pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+}
+
+
+
+###
+# confirm login, confirm signup, confirm reset passwrod, confirm change email
+# the returned token will available in 90 days
+# cannot input same parameter twice, since the login token will be delete after login
+
+POST https://tweettest.vog.media/vapi/vgr1/confirm  HTTP/1.1
+Content-Type: application/json
+
+{
+    "token": "jqhcxqh205e2rv2s9k1qu1v8p7wa6spl",
+    "code": "711015"
+}
+
+
+###
+# change display name
+# mush have 5 second interval
+
+POST https://tweettest.vog.media/vapi/vgr1/changedisplayname  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Displayname": "golden"
+}
+
+
+###
+# change username
+# mush have 5 second interval
+
+POST https://tweettest.vog.media/vapi/vgr1/changeusername  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Username": "golden"
+}
+
+
+###
+# change user profile bio.
+
+POST https://tweettest.vog.media/vapi/vgr1/changedescription  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Description": "this is my channel"
+}
+
+
+###
+# change user profile banner
+
+POST https://tweettest.vog.media/vapi/vgr1/changebanner  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Banner": "this is banner url"
+}
+
+
+###
+# change user avatar
+# the avatar url need to get from upload module
+
+POST https://tweettest.vog.media/vapi/vgr1/changeavatar  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Avatar48": "2021/03/26/3wnuok51j0fnhrt469inwtef4mh1l623_48.jpg",
+    "Avatar96": "2021/03/26/3wnuok51j0fnhrt469inwtef4mh1l623_96.jpg",
+    "Avatar400": "2021/03/26/3wnuok51j0fnhrt469inwtef4mh1l623_400.jpg"
+}
+
+
+###
+# user change to a group
+
+POST https://tweettest.vog.media/vapi/vgr1/changetogroup  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# group change to user
+
+POST https://tweettest.vog.media/vapi/vgr1/changetouser  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+###
+# set user group post limit
+
+POST https://tweettest.vog.media/vapi/vgr1/setgroup HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "groupltw": 2,
+    "grouplfol": 2
+}
+
+
+
+###
+# log out
+# backend will destroy login token
+
+POST https://tweettest.vog.media/vapi/vgr1/logout HTTP/1.1
+Content-Type: application/json
+Authorization: token...
+
+
+###
+# suspend account
+
+POST https://tweettest.vog.media/vapi/vgr1/suspend  HTTP/1.1
+Authorization: elon.0oq4aek88w5yzzccekxmh7hgcgar699ycfina3irduxas9tln32j9mwja9x4ie43
+
+
+###
+# resume account
+
+POST https://tweettest.vog.media/vapi/vgr1/resume  HTTP/1.1
+Authorization: elon.0oq4aek88w5yzzccekxmh7hgcgar699ycfina3irduxas9tln32j9mwja9x4ie43
+
+
+
+
+
+##########################################
+# follow and block
+##########################################
+
+
+###
+# get user follow-to list
+# uid=target user, it is optional, if empty, return token owner's follow-to list
+# parameter start from 1; count is returning records count, default is 50
+# return is similar with API tweetuser
+
+# you have three ways to refresh the followto list at home page:
+# 1. when you enter the group
+# 2. when you receive message from sse
+# 3. when you click "all"
+
+
+GET https://tweettest.vog.media/vapi/vgr1/followto?uid=2&start=1&count=50 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "UserId": 1,
+#       "Username": "golden",
+#       "DisplayName": "golden",
+#       "Description": "this is my channel",
+#       "Avatar96": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#       "BannerPic": "https://pbs.twimg.com/profile_banners/56572394/1575746989/1500x500",
+#       "IsGroup": 1,
+#       "UserDomain": "v1api",
+#       "GroupDomain": "v2api",
+#       "GroupLTw": 2,
+#       "GroupLFol": 2,
+#       "ALive": 1418,
+#       "Online": 9746,
+#       "CreateTime": 1606560664,
+#       "TwCount": 278,
+#       "FollowBy": 10,
+#       "FollowByA": 10,
+#       "FollowTo": 109,
+#       "FollowToA": 209,
+#       "LTw": "this is last post content",
+#       "LArticle": 3,
+#       "TopTw": 123,
+#       "Followed": false,
+#       "Blocked": false
+#     }
+#   ]
+# }
+
+
+
+###
+# get user follow-by list
+# uid=target user, it is optional, if empty, return token owner's follow-to list
+# parameter start from 1; count is returning records count, default is 50
+# return is similar with API tweetuser
+
+GET https://tweettest.vog.media/vapi/vgr1/followby?uid=320&start=1&count=20 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# add follow-to
+# token is A, fol is B, that means add A follow to B 
+# return failed when A have followed B
+# return failed when B blocks A
+# if A has blocked B, blocking will be released automaticlly
+
+POST https://tweettest.vog.media/vapi/vgr1/addfollow HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "fol": 2
+}
+
+
+###
+# remove follow-to
+# token is A, fol is B, that means remove A follow to B 
+# return failed when A have not followed B
+
+POST https://tweettest.vog.media/vapi/vgr1/remfollow HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "fol": 2
+}
+
+
+###
+# get user block list
+# uid=target user, it is optional, if empty, return token owner's follow-to list
+# parameter start from 1; count is returning records count, default is 50
+# return is similar with API tweetuser
+
+GET https://tweettest.vog.media/vapi/vgr1/blocklist?uid=320&start=1&count=50 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# add block somebody
+# token is A, blk is B, that means add A block B, B will not lookup A anymore
+# return failed if A has blocked B already
+# if A has followd B, follow will be canceled automaticlly
+# if B has followd A, follow will be canceled automaticlly, too
+
+POST https://tweettest.vog.media/vapi/vgr1/addblock HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "blk": 2
+}
+
+
+###
+# remove block
+# token is A, fol is B, that means remove A follow to B 
+# return failed when A have not blocked B
+
+POST https://tweettest.vog.media/vapi/vgr1/remblock HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "blk": 2
+}
+
+
+
+
+
+##########################################
+# report
+##########################################
+
+
+###
+# report tweet
+# T is the tweet id of reporting
+# RType support "1" and "2"
+# "1" = "It contents sensitive photo, video, audio, etc."
+# "2" = "It is abusive or harmful to others."
+# cannot report a tweet yourself
+# re-post cannot be reported; the original tweet of re-post can be reported
+
+POST https://tweettest.vog.media/vapi/vgr1/report HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "T": "1624914636998383528",
+    "RType": "2"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "It contents sensitive photo, video, audio, etc.",     report description
+#     "T": "1624502095374983900"
+#   }
+# }
+
+
+###
+# punish user
+# only website administrator can punish
+# parameter Rid is report document id, you can get it in API getreport as below
+# parameter PLevel is punish type (value range 1-6, 9) : 
+# 1 = "Delete post"
+# 2 = "Delete post and freeze user account 1 hour"
+# 3 = "Delete post and freeze user account1 day"
+# 4 = "Delete post and freeze user account7 days"
+# 5 = "Delete post and freeze user account30 days"
+# 6 = "Delete post and freeze user account1 year"
+# 7 = "Delete post and freeze user account forever"
+# after call, user will be freezed(except for plevel=1), the tweet will be deleted
+
+
+POST https://tweettest.vog.media/vapi/vgr1/punish HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "RId": 3,
+    "PLevel": 2
+}
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "Delete post and freeze user account 1 day",         punish description
+#     "T": "1624672053"                                           the time of freeze account to
+#   }
+# }
+
+
+###
+# get report history list
+# count default is 20
+
+GET https://tweettest.vog.media/vapi/vgr1/getreport?start=1&count=20 HTTP/1.1
+Authorization: elon.0oq4aek88w5yzzccekxmh7hgcgar699ycfina3irduxas9tln32j9mwja9x4ie43
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "RId": 2,                                                       report id
+#       "RUserId": 1,                                                   report user id (only open to website manager)
+#       "RTime": 1624570562,                                            report time
+#       "RType": "1",                                                   report type
+#       "RReason": "It contents sensitive photo, video, audio, etc.",   report type desciption
+#       "Punish": "Delete Post && Freeze 1 hour",                       punish result
+#       "FreezeTo": 1624589123,                                         the time to freeze to
+#       "OpUser": "golden",                                             punish operate user (only open to website manager)
+#       "OpTime": 1624585523,                                           punish operate time
+#       "Post": {                                                       tweet content
+#         "T": "1624503251218453200",
+#         "User": {
+#           "Uid": 3,
+#           "User": "elon",
+#           "UserD": "elon",
+#           "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#           "IsGroup": 1
+#         },
+#         "Tw": "elon quote post",
+#         "P": null,
+#         "MTyp": "",
+#         "Url": "",
+#         "St": 1
+#       }
+#     },
+#     {
+#       "RId": 3,
+#       "RUserId": 1,
+#       "RTime": 1624570562,
+#       "RType": "2",
+#       "RReason": "It is abusive or harmful to others.",
+#       "Punish": "",                                                   no punish yet
+#       "FreezeTo": 0,
+#       "OpUser": "",
+#       "OpTime": 0,
+#       "Post": {
+#         "T": "1624503251218453200",
+#         "User": {
+#           "Uid": 3,
+#           "User": "elon",
+#           "UserD": "elon",
+#           "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#           "IsGroup": 1
+#         },
+#         "Tw": "elon quote post",
+#         "P": null,
+#         "MTyp": "",
+#         "Url": "",
+#         "St": 0
+#       }
+#     }
+#   ]
+# }
+
+
+
+###
+# website manager get report list
+# token owner must be a website manager
+
+GET https://tweettest.vog.media/vapi/vgr1/getreport?uid=3&start=1&count=20 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+

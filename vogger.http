@@ -1,0 +1,2666 @@
+
+##########################################
+# normal return json format
+##########################################
+
+
+# {
+#   "Code": 0,          0:return correct;   1:return failed
+#   "Msg": "",          returned message, if Code=0, Msg will be empty normally
+#   "Body": {           returned infomation body
+#     ...
+#   }
+# }
+
+
+
+##########################################
+# register and login
+##########################################
+
+
+###
+# user login
+# user=username/email
+# Password needs to be asymmetrically encrypted in frontend
+# redirect_uri is option, using for redirect
+# token is available in 10 minutes
+
+
+POST https://tweettest.vog.media/vapi/vgr1/login?redirect_uri=https://vog.media/  HTTP/1.1
+Content-Type: application/json
+
+{
+    "user": "zac",
+    "pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Code": "711015",     to verify email
+#     "Email": "ut***",     to display email hint in frontend
+#     "Token": "jqhcxqh205e2rv2s9k1qu1v8p7wa6spl"       to confirm step
+#   }
+# }
+
+
+
+###
+# confirm login, confirm signup, confirm reset passwrod, confirm change email
+# the returned token will available in 90 days
+# cannot input same parameter twice, since the login token will be delete after login
+
+POST https://tweettest.vog.media/vapi/vgr1/confirm  HTTP/1.1
+Content-Type: application/json
+
+{
+    "token": "jqhcxqh205e2rv2s9k1qu1v8p7wa6spl",
+    "code": "711015"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Redirect_uri": "https://vog.media/",     returning redirect url befor
+#     "Token": "zac.o4im24qf9r0djqx9li2b8ko32jhcxkd1eanm2bufe554glrvce1yw5utx73zjap7"
+#   }
+# }
+
+
+
+###
+# guest signup, guest login
+# Key is a string of no less than 16 bits, marking a unique machine ID
+# backend will return user token immediately
+# login with same key will return same token to identify one guest user
+# https://gitlab.vog.media/Phoenix/phoenix/issues/9  guest login issue
+
+POST https://tweettest.vog.media/vapi/vgr1/guestreg  HTTP/1.1
+Content-Type: application/json
+
+{
+    "Key": "1234567890123456789"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Token": "bd39e6773fc19d72.hg2cfho42srn34rim4c0krvmqawmf6343r8le37gnmrkk1k57adgn10a0227dgo2"
+#   }
+# }
+
+
+
+###
+# new user sign up
+# username at least 3 char. only 0-9, a-z, A-Z allowed, The entire network cannot have the same name. (backend verify)
+# the password must be at least 8 characters, and must have letters and numbers
+# the length after encryption must be 64 characters, frontend do it.
+# The entire network cannot have the same displayname. (backend verify)
+
+
+POST https://tweettest.vog.media/vapi/vgr1/register?redirect_uri=https://vog.media/  HTTP/1.1
+Content-Type: application/json
+
+{
+    "Username": "abcedf",
+    "Email": "1@gmail.com",
+    "Pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+    "Displayname": "abc"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Code": "549514",                                 to verify email
+#     "Token": "kt6a9lwggz3pomhos5is25fkifznst5o"       for confirm api
+#   }
+# }
+
+
+###
+# log out
+# backend will destroy login token
+
+POST https://tweettest.vog.media/vapi/vgr1/logout HTTP/1.1
+Content-Type: application/json
+Authorization: token...
+
+
+###
+# suspend account
+
+POST https://tweettest.vog.media/vapi/vgr1/suspend  HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+###
+# resume account
+
+POST https://tweettest.vog.media/vapi/vgr1/resume  HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+
+###
+# check regrist information, this API is reserved, no use.
+
+POST http://127.0.0.1:8011/vapi/vgr1/checkreg  HTTP/1.1
+Content-Type: application/json
+
+{
+    "Username": "007",
+    "Email": "gwg1357924680123@gmail.com",
+    "Pw": "493038362452ceec128386cebbff49c9cbaeedef855147c7b58d9312747b530c",
+    "Displayname": "abc"
+}
+
+
+
+##########################################
+# user basic information
+##########################################
+
+
+
+###
+# get user basic information
+# it is different from another api "tweetuser", "tweetuser" using to get user infomation of tweet
+
+GET https://tweettest.vog.media/vapi/vgr1/userinfo  HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Uid": 1,
+#     "Username": "golden",
+#     "Email": "z@z.com",
+#     "DisplayName": "golden",
+#     "IsGroup": 1,                 >1 is user group, ==0 is user
+#     "GroupLTw": 2,                user group send tweet limit, minimun value of posted tweet
+#     "GroupLFol": 2,               user group send tweet limit, minimum value of follower
+#     "Avatar48": "2021/03/26/bcl3oybldq15xl5w1mkyrmt1i8yujnvz_48.jpg",
+#     "Avatar96": "2021/03/26/bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#     "Avatar400": "2021/03/26/bcl3oybldq15xl5w1mkyrmt1i8yujnvz_400.jpg",
+#     "Description": "this is my channel",
+#     "BannerPic": "this is banner url"
+#   }
+# }
+
+
+###
+# check password for changing password  (reserved)
+
+POST https://tweettest.vog.media/vapi/vgr1/checkpw  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+}
+
+
+###
+# change password
+# the process of change password: The user has logged in, enter the old password and confirm new password, and use this API to write the new password
+
+POST https://tweettest.vog.media/vapi/vgr1/changepw  HTTP/1.1
+Content-Type: application/json
+
+{
+    "pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+    "pwnew": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c91"
+}
+
+
+###
+# reset passrod
+# parameter Email suports email only
+# the process of reset password: The user enters the email, sends an email with confirm code, and then use confirm API
+
+
+POST https://tweettest.vog.media/vapi/vgr1/resetpw  HTTP/1.1
+Content-Type: application/json
+
+{
+    "Email": "zac@abc.com"
+}
+
+
+###
+# change email
+# change email must check password
+# mush have 5 second interval
+
+POST https://tweettest.vog.media/vapi/vgr1/changemail  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Email": "z@z.com",
+    "Pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+}
+
+
+
+###
+# change display name
+# mush have 5 second interval
+
+POST https://tweettest.vog.media/vapi/vgr1/changedisplayname  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Displayname": "golden"
+}
+
+
+###
+# change username
+# mush have 5 second interval
+
+POST https://tweettest.vog.media/vapi/vgr1/changeusername  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Username": "golden"
+}
+
+
+###
+# change user profile bio.
+
+POST https://tweettest.vog.media/vapi/vgr1/changedescription  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Description": "this is my channel"
+}
+
+
+###
+# change user profile banner
+
+POST https://tweettest.vog.media/vapi/vgr1/changebanner  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Banner": "this is banner url"
+}
+
+
+###
+# change user avatar
+# the avatar url need to get from upload module
+
+POST https://tweettest.vog.media/vapi/vgr1/changeavatar  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Avatar48": "2021/03/26/3wnuok51j0fnhrt469inwtef4mh1l623_48.jpg",
+    "Avatar96": "2021/03/26/3wnuok51j0fnhrt469inwtef4mh1l623_96.jpg",
+    "Avatar400": "2021/03/26/3wnuok51j0fnhrt469inwtef4mh1l623_400.jpg"
+}
+
+
+###
+# user change to a group
+
+POST https://tweettest.vog.media/vapi/vgr1/changetogroup  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# group change to user
+
+POST https://tweettest.vog.media/vapi/vgr1/changetouser  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+###
+# set user group post limit
+
+POST https://tweettest.vog.media/vapi/vgr1/setgroup HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "groupltw": 2,
+    "grouplfol": 2
+}
+
+
+
+###
+# set pinned tweet
+# parameter toptw is tweet id
+
+POST https://tweettest.vog.media/vapi/vgr1/settoptw  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "toptw": "1234567890123456789"
+}
+
+
+##########################################
+# send tweet
+##########################################
+
+
+###
+# send text tweet
+# parameter tweet is text to send
+# parameter device is device information from app
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "tweet": "hello",
+    "device": "web"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "tweet",
+#     "T": "1623040975041013264"        tweet id
+#   }
+# }
+
+
+###
+# send tweet to a group
+# groupid is user id in API tweetuser
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "groupid": 1,
+    "tweet": "hello7",
+    "device": "web"
+}
+
+
+
+###
+# send text + picture
+# 4 picture maximum
+# here need to reference to upload picture API.
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "pic": ["pic1 url", "pic2 url", "pic3 url", "pic4 url"],
+    "tweet": "hello7",
+    "device": "web"
+}
+
+
+
+###
+# send article, external url, video, audio, onlive
+# MTyp = “V” uploaded video
+# MTyp = “S” uploaded audio
+# MTyp = “L” onlive
+# MTyp = “M” cellphone recorded live audio
+# MTyp = “R” internal article
+# MTyp = “U” external article url
+# here need to reference to upload video and audio API.
+
+POST  https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "groupid": 0,
+    "tweet": "hello8",
+    "mtyp": "V",
+    "url": "video---url",
+    "device": "web"
+}
+
+
+###
+# re-tweet
+# original tweet is must be available
+# re-tweet only to home, not to a group, groupid must be 0
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "retweet": "1624914441615304471",
+    "device": "web"
+}
+
+
+###
+# quote a tweet and add your comments
+# original tweet is must be available
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "qotweet": "1624914441615304471",
+    "tweet": "007 quoted this tweet 123",
+    "device": "web"
+}
+
+
+###
+# reply tweet
+# original tweet is must be available
+# parameter reply include original tweet owner's user id
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "cotweet": "1624914441615304471",
+    "tweet": "my comments 123",
+    "reply": [1],
+    "device": "web"
+}
+
+
+###
+# reply tweet with other users
+# parameter reply include others user id
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "cotweet": "1622347555150279800",
+    "tweet": "my comments 123",
+    "reply": [1,2,3,4],
+    "device": "web"
+}
+
+
+###
+# view a tweet (reserved by now)
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+{
+    "vitweet": "1616236762347263100",
+    "device": "web"
+}
+
+
+###
+# like a tweet
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "litweet": "1616345923733001100",
+    "device": "web"
+}
+
+###
+# delete a tweet （only do it by himself）
+# the tweet's owner must be same with the token owner
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "block": "1613371342213595400",
+    "device": "web"
+}
+
+
+###
+# caution a tweet in group
+# only group owner can caution a tweet in his group
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "caution": "1613371342213595400",
+    "device": "web"
+}
+
+
+
+###
+# send a message when user input something in a group
+# chatid is client id
+# parameter groupid is group id of user input message
+# when user input text, or select a picture, video, audio, pdf, call this API.
+
+POST http://127.0.0.1:8011/vapi/vgr1/groupinput HTTP/1.1
+Content-Type: application/json
+Authorization: 100.12xboz04qku0hxb2jbs88h6znxlizrlrlku32xwpzdc1sp2yk4qizxyklnc23ufb
+
+{
+     "chatid": "jxx9gq8r",
+     "groupid": 1
+}
+
+
+
+##########################################
+# get tweet
+##########################################
+
+
+###
+# not login, guest gets server spot
+
+GET https://tweettest1.vog.media/vapi/vgr1/hello HTTP/1.1
+
+
+# {
+#   "Code": 0,
+#   "Msg": "No token",
+#   "Body": {
+#     "Avatar": "https://uploadtest.vog.media/storage2/",       the service spot to get avatar
+#     "Domain": "https://tweettest.vog.media",                  the tweet service spot
+#     "OncetimeUser": "oncetimeoncetime.o1uijf5u5p04c2osra69ylq1o5h9ifrdn5mfxps8nzx2vuap7dxcczvfoi3wpe8a", oncetime user token，only read tweet, cannot send.
+#     "TimeStamp": 1623025691                                   the server time, to adjust the client time
+#   }
+# }
+
+
+
+###
+# after login, get service spot
+
+GET https://tweettest.vog.media/vapi/vgr1/hello?token=zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd HTTP/1.1
+
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Avatar": "https://uploadtest.vog.media/storage2/",
+#     "Domain": "https://tweettest.vog.media",
+#     "OncetimeUser": "oncetimeoncetime.o1uijf5u5p04c2osra69ylq1o5h9ifrdn5mfxps8nzx2vuap7dxcczvfoi3wpe8a",
+#     "TimeStamp": 1623026743
+#   }
+# }
+
+
+
+###
+# get user information myself (public information in website)
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+# Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "UserId": 1,
+#     "Username": "golden",
+#     "DisplayName": "golden",
+#     "Description": "this is my channel",
+#     "Avatar96": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#     "BannerPic": "https://pbs.twimg.com/profile_banners/56572394/1575746989/1500x500",
+#     "UserLevel": 0,                   default is 0; 7,8,9 is for site manager; 99 suspend; frontend only have 0 and 99
+#     "IsGroup": 1,                     >1 is user group, ==0 is user
+#     "GroupSrv": "S1",                 service spot name (only for group, no use for frontend)
+#     "GroupDomain": "https://tweettest.vog.media",     service domain (only for group)
+#     "GroupLTw": 2,                    group send tweet limit for minimun tweet amount (only for group)
+#     "GroupLFol": 2,                   group send tweet limit for minimun follower amount (only for group)
+#     "ALive": 32416,                   the last time of user send tweet
+#     "Online": 1623027898,             the last time of user is online (5 minutes update once time)
+#     "CreateTime": 1606560664,         the time of user join vogger
+#     "TwCount": 277,                   how many tweets user posted
+#     "FollowBy": 45,                   how many user follow to him
+#     "FollowByA": 45,                  how many active user follow to him
+#     "FollowTo": 57,                   how many user he followed
+#     "FollowToA": 57,                  how many active user he followed
+#     "Blocked": 0,                     how many user he blocked
+#     "LTw": "the last tweet content",  the last tweet content which user send
+#     "LArticle": 3,                    the last article id which user post
+#     "TopTw": 0,                       the pinned tweet
+#     "Reported": 2,                    how many times he was reported by others (this is not public infomation, only open to himself)
+#     "FreezeTo": 1624589123,           account will be freezed to (this is not public infomation, only open to himself)
+#     "IFollowed": false,               do I follow to him?
+#     "FollowToMe": false,              does hi follow to me?
+#     "IBlockHim": false,               do I blocked him?
+#     "MyFriend": false,                have I added friend with him?
+#     "FWithMe": 0,                     how many followers are who I followed.
+#     "FWithMeList": [                  same follower with me (only 3 ones list here)
+#       "007",
+#       "elon",
+#       "eden"
+#     ]
+#   }
+# }
+
+
+
+###
+# get other user information (public information in website)
+# return error if this user has blocked me
+# uid = the user you want to look over
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=2 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# get other user information (public information in website)
+# return error if this user has blocked me
+# uid = the user you want to look over
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?user=elon HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# sse connect to home timeline
+# you have to connect to home timeline oncetime
+# TOKEN=login token
+# CHATID=string with 8 length，to unique every connected client, please keep it no change when connect sse again
+# eventsource is connect sse js code key word
+
+GET https://tweettest.vog.media/vapi/vgr1/stream/TOKEN/CHATID
+# var source1 = new EventSource(url);
+
+# sse message type
+# Typ = "P" heart
+# Typ = "A" adertising
+# Typ = “E” tweet statistics
+# Typ = “N” notification
+# Typ = “S” tweet post
+# Typ = “T” tweet post
+# Typ = “I” group input message (only in group sse)
+
+# if Typ = “S” or Typ = “T”, there are 4 tweet method: normal tweet, re-tweet, reply tweet, quote tweet
+# "normal tweet": is post as an original information
+# "re-tweet":     when you recieve a tweet, you can retweet it to home only, and you can retweet it once time
+# "reply tweet":  when you recieve a tweet, you can reply it; if the tweet is a retweet, the reply is for the original tweet.
+# "quote tweet":  when you recieve a tweet, you can quote it, and then add your input
+
+# media url content type
+# MTyp = “V” uploaded video
+# MTyp = “S” uploaded audio
+# MTyp = “L” onlive
+# MTyp = “M” cellphone recorded live audio
+# MTyp = “R” internal article
+# MTyp = “U” external article url
+
+# sse return json  Typ = “S” or Typ = “T”
+# {
+#   "T": "1625278520190603805",         tweet timestamp, need to be adjusted by server time. (the server time is return in API "hello")
+#   "Typ": "T",                         sse message type
+#   "Group": {                          group information
+#     "Uid": 0,                         user group id. if it is 0, the tweet posted at home; if not 0, the tweet posted in a group
+#     "User": "",                       user group name
+#     "UserD": "",                      user group display name
+#     "UserA": "",                      user group avatar
+#     "IsGroup": 0                      user group flag
+#   },
+#   "User": {                           user infomation
+#     "Uid": 2,                         user id
+#     "User": "007",                    username
+#     "UserD": "007",                   user display name
+#     "UserA": "3wnuok51j0fnhrt469inwtef4mh1l623_96.jpg",       user avatar
+#     "IsGroup": 0                      user group flag
+#   },
+#   "Reply": null,                      if it is a "reply tweet", reply is open to user to add other user
+#   "ReUser": {                         if it is a "re-tweet", this is original tweet user infomation
+#     "Uid": 0,
+#     "User": "",
+#     "UserD": "",
+#     "UserA": "",
+#     "IsGroup": 0,
+#     "Followed": false                 do you follow to him?
+#   },
+#   "Retw": "",                         if it is not empty, that is a re-tweet
+#   "Tw": "test",                       tweet posted text
+#   "P": null,                          picture url list (maximum pictures)
+#   "MTyp": "",                         media url content type
+#   "Url": "",                          media url
+#   "St": 0,                            tweet status, 0=normal; 1=deleted; 2=caution in group
+#   "Stat": {                           tweet statistics
+#     "Exposure": 0,                    exposure times to client
+#     "Viewer": 0,                      how many viewer of media(reserved temporarily)
+#     "ULike": 0,                       how many likes of this tweet
+#     "Ret": 0,                         how many re-tweet times of this tweet
+#     "Qot": 0,                         how many quoted times of this tweet
+#     "Cot": 0                          how many reply tweets
+#   },
+#   "StatU": {                          tweet status related to you
+#     "ViewerU": 0,                     you have viewed this tweet, 0=no; 1=yes
+#     "ULikeU": 0,                      you have liked this tweet, 0=no; 1=yes
+#     "RetU": 0                         you have re-tweeted this tweet, 0=no; 1=yes
+#   },
+#   "QotS": null,                       if it is a "quote tweet", it will be quoted tweet content
+#   "PatS": null                        if it is a "reply tweet", it will be parent tweet content
+# }
+
+# sse return json  Typ = “I”
+# {
+#   "T": "1626412970697250200",
+#   "Typ": "I",
+#   "User": {
+#     "Uid": 1,
+#     "User": "golden",
+#     "UserD": "golden",
+#     "UserA": "2021/03/26/bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#     "IsGroup": 1
+#   }
+# }
+
+
+###
+# sse connect to a group
+# if user enter a group, connect this group, don't disconnect home timeline sse
+# CHATID=string with 8 length
+# parameter groupid = group id
+
+GET https://tweettest.vog.media/vapi/vgr1/stream/TOKEN/CHATID?groupid=1
+# var source1 = new EventSource(url);
+
+
+
+###
+# change sse connection to another group
+# don't change chatid
+# parameter groupid = group id
+
+POST https://tweettest.vog.media/vapi/vgr1/streamgroup HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+     "chatid": "abcdefgh",
+     "groupid": 1
+}
+
+
+
+###
+# get group service spot (deleted, don't use it, merged to tweetuser/followto )
+# the group domain in APT "tweetuser" is empty, call this API to get a new one
+
+GET https://tweettest.vog.media/vapi/vgr1/groupdomain?groupid=1 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "GroupDomain": "https://tweettest.vog.media"      group service spot
+#   }
+# }
+
+
+
+###
+# get home timeline
+
+GET https://tweettest.vog.media/vapi/vgr1/timeline HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "count": 20,                          // total tweet amount returned
+#     "timeline": [                         // timeline tweet list
+#       {
+#         "T": "1622996866571437415",
+#         "Typ": "T",
+#         "Group": {
+#           "Uid": 0,
+#           "User": "",
+#           "UserD": "",
+#           "UserA": "",
+#           "IsGroup": 0
+#         },
+#         "User": {
+#           "Uid": 3,
+#           "User": "elon",
+#           "UserD": "elon",
+#           "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#           "IsGroup": 1
+#         },
+#         "Reply": null,
+#         "ReUser": {
+#           "Uid": 0,
+#           "User": "",
+#           "UserD": "",
+#           "UserA": "",
+#           "IsGroup": 0,
+#           "Followed": false
+#         },
+#         "Retw": "",
+#         "Tw": "c4",
+#         "P": null,
+#         "MTyp": "",
+#         "Url": "",
+#         "St": 0,
+#         "Stat": {
+#           "Exposure": 0,
+#           "Viewer": 0,
+#           "ULike": 0,
+#           "Ret": 0,
+#           "Qot": 0,
+#           "Cot": 0
+#         },
+#         "StatU": {
+#           "ViewerU": 0,
+#           "ULikeU": 0,
+#           "RetU": 0
+#         },
+#         "QotS": null,
+#         "PatS": [
+#           {
+#             "T": "1622995482315904188",
+#             "User": {
+#               "Uid": 1,
+#               "User": "golden",
+#               "UserD": "golden",
+#               "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#               "IsGroup": 1
+#             },
+#             "Tw": "haha",
+#             "P": null,
+#             "MTyp": "",
+#             "Url": "",
+#             "St": 0,
+#             "Stat": {
+#               "Exposure": 0,
+#               "Viewer": 0,
+#               "ULike": 0,
+#               "Ret": 0,
+#               "Qot": 0,
+#               "Cot": 4
+#             },
+#             "StatU": {
+#               "ViewerU": 0,
+#               "ULikeU": 0,
+#               "RetU": 0
+#             }
+#           }
+#         ]
+#       }
+#     ],
+#     "users": 4       //how many user returned (no use for frontend)
+#   }
+# }
+
+
+###
+# get home timeline (to a deadline timestamp)
+# this is for page down of display home timeline
+# the last tweet timestamp in previous page is the input time of this page
+
+GET https://tweettest.vog.media/vapi/vgr1/timeline/1690000000 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+###
+# get user tweet list in user profile
+# choose one of the two parameters uid/user, uid = user id; user=username
+# parameter category has three option: "", article, media, for three sub-page: all tweet, article tweet and media tweet
+# timeto=deadline, using for page down, it is same with timeline
+# count=return tweet count, default is 20
+# the return json is similar with API timeline
+
+GET https://tweettest.vog.media/vapi/vgr1/usertw?uid=1&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# example for parameter of user
+# timeto=deadline, using for page down, it is same with timeline
+
+GET https://tweettest.vog.media/vapi/vgr1/usertw?user=golden&timeto=1815781974068082400&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# category=article，only return internal article, include re-tweet article
+
+GET https://tweettest.vog.media/vapi/vgr1/usertw?uid=1&category=article&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# category=media，only return uploaded video, uploaded audio and onlive, include re-tweet media
+
+GET https://tweettest.vog.media/vapi/vgr1/usertw?uid=1&category=media&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# get group tweet timeline
+# choose one of the two parameters uid/user, uid = group id; user = username
+# parameter category is same with API usertw
+# timeto=deadline, using for page down, it is same with timeline
+# count=return tweet count, default is 20
+# if user is not a group, and user have history group tweet, returning is available
+
+GET https://tweettest.vog.media/vapi/vgr1/grouptw?uid=1&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# category=article，only return internal article, include re-tweet article
+
+GET https://tweettest.vog.media/vapi/vgr1/grouptw?uid=1&category=article&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# category=media，only return uploaded video, uploaded audio and onlive, include re-tweet media
+
+GET https://tweettest.vog.media/vapi/vgr1/grouptw?uid=1&category=media&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# get actvie user list in a group
+# it is sorted by the time of posting tweet
+# count=return tweet count, default is 20
+# it won't include group himself, forntend have to add group himself at the top
+
+GET https://tweettest.vog.media/vapi/vgr1/groupactiveuser?uid=3 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 474,
+#       "User": "voguser3",
+#       "UserD": "voguser3",
+#       "UserA": "",
+#       "IsGroup": 0
+#     },
+#     {
+#       "Uid": 470,
+#       "User": "newuser4",
+#       "UserD": "newuser4",
+#       "UserA": "",
+#       "IsGroup": 0
+#     }
+#   ]
+# }
+
+
+###
+# get a tweet with its reply, quote and re-tweet
+# parameter is main tweet id
+# parameter start from 1; count is returning records count, default is 20
+# the return is similar with timeline, a different is return more tweet parent
+
+GET https://tweettest.vog.media/vapi/vgr1/get/1624914441615304471?count=20&start=1 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "T": "1624502095374983900",               main tweet id
+#     <main tweet content>
+#     "PatS": null,                             tweet parent list
+#     "CotS": [                                 reply, quote and retweet of main tweet
+#       {
+#         ...
+#         "Cotw": "1624502095374983900",
+#         ...
+#       },
+#       {
+#         ...
+#         "QotS": [                             QotS won't be null if it is a quote tweet
+#           {
+#             "T": "1624502095374983900",
+#             ...
+#           }
+#         ]
+#       },
+#       {
+#         ...
+#         "Retw": "1624502095374983900",        Retw won't be empty if it is a re-tweet
+#         ...
+#       }
+#     ],
+#     "QotS": null                              the quote tweet of main tweet
+#   }
+# }
+
+
+
+###
+# check tweet is available or not
+# this is an internal API
+
+GET https://tweettest.vog.media/vapi/vgr1/check/1614882638820147906 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# get user notification list
+# parameter start from 1; count is returning records count, default is 20
+
+GET https://tweettest.vog.media/vapi/vgr1/ulog?start=1&count=20 HTTP/1.1
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+# notification type (tweet related)：
+# 1 follow you
+# 2 re-tweet your tweet
+# 3 reply your tweet
+# 4 quote your tweet
+# 5 like your tweet
+# notification type (message related)：
+# 11 add friend
+# 12 you have a request to add friend
+# 13 you have been accepted add friend with somebody
+# 14 you have been rejected add friend with somebody
+# 15 you recieved a private message from your friend
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Ids": [                        id list(reserved)
+#         "1622996866775009111"
+#       ],
+#       "Resps": [                      partner user infomation
+#         {
+#           "Uid": 1,
+#           "User": "golden",
+#           "UserD": "golden",
+#           "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#           "IsGroup": 0
+#         }
+#       ],
+#       "Uid": 1,                       user of youself
+#       "Act": 3,                       notification type
+#       "Msg": {
+#           twee content or message content
+#       }
+#       "Unread": true   true: not read; false: read
+#     }
+#   ]
+# }
+
+
+###
+# get user unread notification count
+# this API uses for user enter home and when you have multiple account
+# after user all API ulog, all unread status will be clear.
+
+GET https://tweettest.vog.media/vapi/vgr1/unreadulog HTTP/1.1
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": 2                       unread notification count
+# }
+
+
+
+##########################################
+# follow and block
+##########################################
+
+
+###
+# get user follow-to list
+# uid=target user, it is optional, if empty, return token owner's follow-to list
+# parameter start from 1; count is returning records count, default is 50
+# return is similar with API tweetuser
+
+GET https://tweettest.vog.media/vapi/vgr1/followto?uid=2&start=1&count=50 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "UserId": 1,
+#       "Username": "golden",
+#       "DisplayName": "golden",
+#       "Description": "this is my channel",
+#       "Avatar96": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#       "BannerPic": "https://pbs.twimg.com/profile_banners/56572394/1575746989/1500x500",
+#       "IsGroup": 1,
+#       "GroupSrv": "S1",
+#       "GroupDomain": "https://tweettest.vog.media",
+#       "GroupLTw": 2,
+#       "GroupLFol": 2,
+#       "ALive": 1418,
+#       "Online": 9746,
+#       "CreateTime": 1606560664,
+#       "TwCount": 278,
+#       "FollowBy": 10,
+#       "FollowByA": 10,
+#       "FollowTo": 109,
+#       "FollowToA": 209,
+#       "LTw": "this is last post content",
+#       "LArticle": 3,
+#       "TopTw": 123,
+#       "Followed": false,
+#       "Blocked": false
+#     }
+#   ]
+# }
+
+
+
+###
+# get user follow-by list
+# uid=target user, it is optional, if empty, return token owner's follow-to list
+# parameter start from 1; count is returning records count, default is 50
+# return is similar with API tweetuser
+
+GET https://tweettest.vog.media/vapi/vgr1/followby?uid=320&start=1&count=20 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# add follow-to
+# token is A, fol is B, that means add A follow to B
+# return failed when A have followed B
+# return failed when B blocks A
+# if A has blocked B, blocking will be released automaticlly
+
+POST https://tweettest.vog.media/vapi/vgr1/addfollow HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "fol": 2
+}
+
+
+###
+# remove follow-to
+# token is A, fol is B, that means remove A follow to B
+# return failed when A have not followed B
+
+POST https://tweettest.vog.media/vapi/vgr1/remfollow HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "fol": 2
+}
+
+
+###
+# get user block list
+# uid=target user, it is optional, if empty, return token owner's follow-to list
+# parameter start from 1; count is returning records count, default is 50
+# return is similar with API tweetuser
+
+GET https://tweettest.vog.media/vapi/vgr1/blocklist?uid=2start=1&count=50 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# add block somebody
+# token is A, blk is B, that means add A block B, B will not lookup A anymore
+# return failed if A has blocked B already
+# if A has followd B, follow will be canceled automaticlly
+# if B has followd A, follow will be canceled automaticlly, too
+
+POST https://tweettest.vog.media/vapi/vgr1/addblock HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "blk": 2
+}
+
+
+###
+# remove block
+# token is A, fol is B, that means remove A follow to B
+# return failed when A have not blocked B
+
+POST https://tweettest.vog.media/vapi/vgr1/remblock HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "blk": 2
+}
+
+
+
+##########################################
+# user recommendation
+##########################################
+
+###
+# user recomendation list by website
+
+GET https://tweettest.vog.media/vapi/vgr1/reco HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "UserId": 418,
+#       "Username": "user_55pmislq",
+#       "DisplayName": "Guest_islq",
+#       "Description": "",
+#       "Avatar48": "",
+#       "Avatar96": "",
+#       "TwCount": 30,
+#       "FollowBy": 4
+#     }
+#   ]
+# }
+
+
+###
+# get recommand user list when entering a user profile
+# following example means when user enter 350's profile, return user recommand list
+
+GET https://tweettest.vog.media/vapi/vgr1/profilereco/350 HTTP/1.1
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: hsfvq2h86dxsoyyl.h2qubvc79tb432ybp4b8pz3q2ssbxh06udxljdc2ubu1m8zwntvcodx9daoeo3ud
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "UserId": 2,
+#       "Username": "007",
+#       "DisplayName": "007",
+#       "Description": "007007",
+#       "Avatar96": "3wnuok51j0fnhrt469inwtef4mh1l623_96.jpg",
+#       "TwCount": 654,
+#       "FollowBy": 15
+#     }
+#   ]
+# }
+
+
+###
+# get user recommendation (reserved)
+
+GET http://127.0.0.1:8011/vapi/vgr1/userreco HTTP/1.1
+Authorization: 100.12xboz04qku0hxb2jbs88h6znxlizrlrlku32xwpzdc1sp2yk4qizxyklnc23ufb
+
+
+###
+# set user recommendation (reserved)
+
+POST http://127.0.0.1:8011/vapi/vgr1/setuserreco HTTP/1.1
+Authorization: 100.12xboz04qku0hxb2jbs88h6znxlizrlrlku32xwpzdc1sp2yk4qizxyklnc23ufb
+
+{
+    "recos" : [
+        {
+            "recouserid": 2,
+            "order": 1
+        }, {
+            "recouserid": 3,
+            "order": 2
+        }, {
+            "recouserid": 4,
+            "order": 3
+        }
+    ]
+}
+
+
+
+##########################################
+# search
+##########################################
+
+
+###
+# search follower and following
+# s=search content
+# count is returning records count, default is 5
+# this API uses for search user with 1-2 characters.
+
+GET https://tweettest.vog.media/vapi/vgr1/searchfollow?s=E7&count=5
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "UserId": 354,
+#       "Username": "9SS8e7Ww",
+#       "DisplayName": "9SS8e7Ww9SS8e7Ww",
+#       "Description": "",
+#       "Avatar96": "",
+#       "BannerPic": "",
+#       "UserLevel": 0,
+#       "IsGroup": 0,
+#       "GroupSrv": "",
+#       "GroupDomain": "",
+#       "GroupLTw": 0,
+#       "GroupLFol": 0,
+#       "ALive": 1623861294,
+#       "Online": 0,
+#       "Ulog": 0,
+#       "CreateTime": 1623861294,
+#       "TwCount": 117,
+#       "FollowBy": 1,
+#       "FollowByA": 1,
+#       "FollowTo": 1,
+#       "FollowToA": 1,
+#       "Blocked": 0,
+#       "LTw": "",
+#       "LArticle": 0,
+#       "TopTw": 0,
+#       "Reported": 0,
+#       "FreezeTo": 0
+#     }
+#   ]
+# }
+
+
+
+###
+# search user
+# s=search content
+# parameter start from 1; count is returning records count, default is 10
+
+GET https://tweettest.vog.media/vapi/vgr1/searchuser?s=elo&start=1&count=10
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Result": [
+#       {
+#         "UserId": 236,
+#         "Username": "tianjinkeyou",
+#         "DisplayName": "GM09",
+#         "Description": ":-)",
+#         "Avatar96": "",
+#         "BannerPic": "",
+#         "IsGroup": 0,
+#         "GroupSrv": "",
+#         "GroupDomain": "",
+#         "GroupLTw": 0,
+#         "GroupLFol": 0,
+#         "ALive": 123,
+#         "Online": 0,
+#         "CreateTime": 1606560875,
+#         "TwCount": 0,
+#         "FollowBy": 0,
+#         "FollowTo": 0,
+#         "Blocked": 0,
+#         "TopTw": 0
+#       }
+#     ],
+#     "Total": 1
+#   }
+# }
+
+
+###
+# search tweet
+# s=search content, suport search phrase
+# parameter start from 1; count is returning records count, default is 10
+# support search tweet for a user
+
+GET https://tweettest.vog.media/vapi/vgr1/searchtweet?s=test&start=1&count=10
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Result": [
+#       {
+#         "T": "1622643257170371053",
+#         "Group": {
+#           "Uid": 0,
+#           "User": "",
+#           "UserD": "",
+#           "UserA": "",
+#           "IsGroup": 0
+#         },
+#         "User": {
+#           "Uid": 4,
+#           "User": "eden",
+#           "UserD": "eden",
+#           "UserA": "ilvlrm0c571256ebyv7ir89u1xhsakgd_96.jpg",
+#           "IsGroup": 1
+#         },
+#         "Reply": null,
+#         "ReUser": {
+#           "Uid": 0,
+#           "User": "",
+#           "UserD": "",
+#           "UserA": "",
+#           "IsGroup": 0,
+#           "Followed": false
+#         },
+#         "Retw": "",
+#         "Tw": "\u003cspan style='color: red;'\u003etest\u003c/span\u003e send",
+#         "P": null,
+#         "MTyp": "",
+#         "Url": "",
+#         "St": 0,
+#         "Stat": {
+#           "Exposure": 0,
+#           "Viewer": 0,
+#           "ULike": 0,
+#           "Ret": 0,
+#           "Qot": 0,
+#           "Cot": 0
+#         },
+#         "StatU": {
+#           "ViewerU": 0,
+#           "ULikeU": 0,
+#           "RetU": 0
+#         },
+#         "QotS": null,
+#         "PatS": null
+#       }
+#     ],
+#     "Total": 82           // search rerord amount totally
+#   }
+# }
+
+
+###
+# search tweet of a user tweet
+# uid=search target user id
+
+GET https://tweettest.vog.media/vapi/vgr1/searchtweet?s=test&uid=1&start=1&count=10
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# search tweet in a group
+# groupid=search target group id
+# groupid and uid cannot exist at the same time, if they exist at the same time, groupid is invalid
+
+GET https://tweettest.vog.media/vapi/vgr1/searchtweet?s=hello7&groupid=1&start=1&count=10
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# search article
+# s=search content, search artile title/excerpt/cotent, suport search phrase
+# parameter start from 1; count is returning records count, default is 10
+# support search tweet for a user
+
+GET https://tweettest.vog.media/vapi/vgr1/searcharticle?s=test&start=1&count=10
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# search user article
+# uid=target user id
+
+GET https://tweettest.vog.media/vapi/vgr1/searcharticle?s=test&uid=1&start=1&count=10
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# generate search index manually (reserved, don't use)
+
+POST http://127.0.0.1:8011/vapi/vgr1/indextweet
+Content-Type: application/json
+
+{
+    "id": 1232,
+    "tweet": "this is tweet content"
+}
+
+
+###
+# generate search index manually (reserved, don't use)
+
+POST http://127.0.0.1:8011/vapi/vgr1/indexuser
+Content-Type: application/json
+
+{
+    "id": 1,
+    "username": "abc121",
+    "displayname": "zac",
+    "description": "i am zac"
+}
+
+
+
+##########################################
+# bookmark
+##########################################
+
+###
+# add bookmark
+
+POST https://tweettest.vog.media/vapi/vgr1/addbookmark  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "T": "1618073907813772044"
+}
+
+###
+# remove bookmark
+
+POST https://tweettest.vog.media/vapi/vgr1/rembookmark  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "T": "1618077860619490208"
+}
+
+
+
+###
+# remove all bookmark
+
+POST https://tweettest.vog.media/vapi/vgr1/remallbookmark  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# get bookmark list
+# parameter start from 1; count is returning records count, default is 10
+# return json is similar with API usertw
+
+GET https://tweettest.vog.media/vapi/vgr1/getbookmark?start=1&count=10
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+
+##########################################
+# report
+##########################################
+
+
+###
+# report tweet
+# T is the tweet id of reporting
+# RType support "1" and "2"
+# "1" = "It contents sensitive photo, video, audio, etc."
+# "2" = "It is abusive or harmful to others."
+# cannot report a tweet yourself
+# re-tweet cannot be reported; the original tweet of re-tweet can be reported
+
+POST https://tweettest.vog.media/vapi/vgr1/report HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "T": "1624914636998383528",
+    "RType": "2"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "It contents sensitive photo, video, audio, etc.",     report description
+#     "T": "1624502095374983900"
+#   }
+# }
+
+
+###
+# punish user
+# only website administrator can punish
+# parameter Rid is report document id, you can get it in API getreport as below
+# parameter PLevel is punish type (value range 1-6, 9) :
+# 1 = "Delete post"
+# 2 = "Delete post and freeze user account 1 hour"
+# 3 = "Delete post and freeze user account1 day"
+# 4 = "Delete post and freeze user account7 days"
+# 5 = "Delete post and freeze user account30 days"
+# 6 = "Delete post and freeze user account1 year"
+# 7 = "Delete post and freeze user account forever"
+# after call, user will be freezed(except for plevel=1), the tweet will be deleted
+
+
+POST https://tweettest.vog.media/vapi/vgr1/punish HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "RId": 3,
+    "PLevel": 2
+}
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "Delete post and freeze user account 1 day",         punish description
+#     "T": "1624672053"                                           the time of freeze account to
+#   }
+# }
+
+
+###
+# get report history list
+# count default is 20
+
+GET https://tweettest.vog.media/vapi/vgr1/getreport?start=1&count=20 HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "RId": 2,                                                       report id
+#       "RUserId": 1,                                                   report user id (only open to website manager)
+#       "RTime": 1624570562,                                            report time
+#       "RType": "1",                                                   report type
+#       "RReason": "It contents sensitive photo, video, audio, etc.",   report type desciption
+#       "Punish": "Delete Post && Freeze 1 hour",                       punish result
+#       "FreezeTo": 1624589123,                                         the time to freeze to
+#       "OpUser": "golden",                                             punish operate user (only open to website manager)
+#       "OpTime": 1624585523,                                           punish operate time
+#       "Post": {                                                       tweet content
+#         "T": "1624503251218453200",
+#         "User": {
+#           "Uid": 3,
+#           "User": "elon",
+#           "UserD": "elon",
+#           "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#           "IsGroup": 1
+#         },
+#         "Tw": "elon quote post",
+#         "P": null,
+#         "MTyp": "",
+#         "Url": "",
+#         "St": 1
+#       }
+#     },
+#     {
+#       "RId": 3,
+#       "RUserId": 1,
+#       "RTime": 1624570562,
+#       "RType": "2",
+#       "RReason": "It is abusive or harmful to others.",
+#       "Punish": "",                                                   no punish yet
+#       "FreezeTo": 0,
+#       "OpUser": "",
+#       "OpTime": 0,
+#       "Post": {
+#         "T": "1624503251218453200",
+#         "User": {
+#           "Uid": 3,
+#           "User": "elon",
+#           "UserD": "elon",
+#           "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#           "IsGroup": 1
+#         },
+#         "Tw": "elon quote post",
+#         "P": null,
+#         "MTyp": "",
+#         "Url": "",
+#         "St": 0
+#       }
+#     }
+#   ]
+# }
+
+
+
+###
+# website manager get report list
+# token owner must be a website manager
+
+GET https://tweettest.vog.media/vapi/vgr1/getreport?uid=3&start=1&count=20 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+
+##########################################
+# article
+##########################################
+
+
+###
+# create an article
+# parameter pic is article cover picture address
+
+POST https://tweettest.vog.media/vapi/vgr1/savearticle  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "title": "this is zac title",
+    "excerpt": "this is zac expert",
+    "content": "this is zac article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content",
+    "pic": "this is pic address"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "article": "emjlkfgx8n3be2kl",        article hash
+#     "articleid": 55224                    article id
+#   }
+# }
+
+
+###
+# update an article
+# key is article hash
+# cannot update an article when it has been published before 7 days
+
+POST https://tweettest.vog.media/vapi/vgr1/savearticle  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "article": "emjlkfgx8n3be2kl",
+    "title": "this is title",
+    "excerpt": "this is expert",
+    "content": "this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content",
+    "pic": "this is pic address"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "article": "emjlkfgx8n3be2kl",
+#     "articleid": 55224
+#   }
+# }
+
+
+
+###
+# publish an article
+# the progress of publish an article: send a tweet include article url，and then call this API
+# parameter tweetid is tweet id
+# return false if content less than 100 characters
+# cannot publish an article which has been published
+# an article has been published, if the attached tweet was deleted, the article will have unpublish status, you can re-publish it, but you need create a new tweet
+
+POST https://tweettest.vog.media/vapi/vgr1/publisharticle  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "tweetid": "1618077905059391489",
+    "article": "emjlkfgx8n3be2kl"
+}
+
+
+###
+# actively read articles, count +1
+# parameter is article hash
+
+POST https://tweettest.vog.media/vapi/vgr1/viewarticle/emjlkfgx8n3be2kl  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+###
+# read an article
+# key is article hash
+# is article attached tweet is deleted, return status unpublish
+
+GET https://tweettest.vog.media/vapi/vgr1/article/emjlkfgx8n3be2kl  HTTP/1.1
+Content-Type: application/json
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "ArticleId": 55224,
+#     "Article": "emjlkfgx8n3be2kl",
+#     "UserId": 1,
+#     "Author": "golden",
+#     "Title": "this is title",
+#     "Excerpt": "this is expert",
+#     "Content": "this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content",
+#     "TweetId": "1618077905059391489",     attached tweet id, "" is unpublished
+#     "PublishTime": 1623083157,            pubulish is 0
+#     "PublishPastT": 118,                  pubulish is 0
+#     "CreateTime": 1623081421,             article create time
+#     "CreatePastT": 1482,                  article create time(to now)
+#     "UpdateTime": 1623081421,             article update time
+#     "UpdatePastT": 1482,                  article update time(to now)
+#     "Pic": "this is pic address",         article cover picture url
+#     "Status": 0,                          0=unpublished; 1=published;
+#     "ViewCount": 0,                       actively read articles count
+#     "Exposure": 0,                        attached tweet exposure times
+#     "Ulike": 0,                           attached tweet like count
+#     "Ret": 0                              attached tweet was quoted count
+#     "Qot": 0                              attached tweet was re-tweeted count
+#   }
+# }
+
+
+
+###
+# get user's article list
+# parameter start from 1; count is returning records count, default is 10
+# return json is similar with API article (have no article content), using for "my articles" display
+# only return article you write
+# if an article attached tweet is deleted, status will be return to unpublished
+
+GET https://tweettest.vog.media/vapi/vgr1/articles?start=1&count=10  HTTP/1.1
+
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+###
+# recommendation article list
+# parameter start from 1; count is returning records count, default is 10
+# return json is similar with API article (have no article content), using for "home - articles" display
+# firstly display the articles of users who you follow, and then select the latest article from the article list
+
+GET https://tweettest.vog.media/vapi/vgr1/recoarticles?start=1&count=2  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+##########################################
+# private message
+##########################################
+
+# the following simulates the entire process of checking friends, adding friends, rejecting friends, accepting friends, sending messages to each other, and deleting friends.
+# 1. zac   get user information  -  check if you are friends with each other
+# 2. zac   add friend
+# 3. zac   check whether it has been added successfully  -  the other party did not confirm at this time
+# 4. elon  get user information  -  check the status of each other's friends
+# 5. zac   get user private message list  -  sender of friend request
+# 6. elon  get user private message list  -  friend request recipient
+# 7. elon  rejects friend request
+# 8. zac   get user private message list  -  after friend application is rejected
+# 9. elon  get user private message list  -  after rejecting friend request
+# 10. zac  add friends again
+# 11. elon accept friend request
+# 12. zac  get user private message list  -  after friend application is approved
+# 13. elon get user private message list  -  after agreeing to friend application
+# 14. zac  get user information  -  check again if it is a friend
+# 15. elon get user information  -  check again if it is a friend
+# 16. zac  send message  -  zac send message to elon
+# 17. elon send message  -  elon send message to zac
+# 18. zac  get the list of chat history with a friend  -  the chat history seen by zac
+# 19. elon get the list of chat history with a friend  -  the chat history seen by elon
+# 20. elon delete friends  -  elon deletes friends unilaterally
+# 21. zac  get user information  -  check again if you are a friend
+# 22. elon get user information  -  check again if it is a friend
+# 23. zac  delete friends  -  zac also deletes friends and restores the initial state
+
+
+
+###
+# 1. zac   get user information  -  check if you are friends with each other
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=3 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "UserId": 3,
+#     "Username": "elon",
+#     "DisplayName": "elon",
+#     "Description": "elonelonelon",
+#     "Avatar96": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#     "BannerPic": "https://pbs.twimg.com/profile_banners/56572394/1575746989/1500x500",
+#     "IsGroup": 1,
+#     "GroupSrv": "",
+#     "GroupDomain": "",
+#     "GroupLTw": 0,
+#     "GroupLFol": 0,
+#     "ALive": 42,
+#     "Online": 822,
+#     "CreateTime": 1606560664,
+#     "TwCount": 585,
+#     "FollowBy": 17,
+#     "FollowByA": 17,
+#     "FollowTo": 29,
+#     "FollowToA": 29,
+#     "Blocked": 1,
+#     "LTw": "this is last post content",
+#     "LArticle": 0,
+#     "TopTw": 1621967014796176262,
+#     "IFollowed": true,
+#     "FollowToMe": true,
+#     "IBlockHim": false,
+#     "MyFriend": false,                        confirm that you are not a friend
+#     "FWithMe": 3,
+#     "FWithMeList": [
+#       "007",
+#       "eden",
+#       "yyy123"
+#     ]
+#   }
+# }
+
+
+###
+# 2. zac   add friend
+# the parameter is a greeting msg added by the user
+
+POST https://tweettest.vog.media/vapi/vgr1/addfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "friend": 3,
+    "msg": "hello, elon"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "add friend",
+#     "Uid": 1,
+#     "Fid": 3,
+#     "MsgId": 1623087639086629252
+#   }
+# }
+
+
+###
+# 3. zac   check whether it has been added successfully  -  the other party did not confirm at this time
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=3 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+#     "MyFriend": false,            not yet a friend (the other party has not confirmed yet)
+
+
+###
+# 4. elon  get user information  -  check the status of each other's friends
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=1 HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+#    "MyFriend": false,            not yet a friend
+
+
+
+###
+# 5. zac   get user private message list  -  sender of friend request
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 3,
+#       "User": "elon",
+#       "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#       "ChatId": "chat~1~3",
+#       "Msg": {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 11,
+#         "Status": 1,                      0：unread; 1：read
+#         "MsgId": 1623087639086629252,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+###
+# 6. elon  get user private message list  -  friend request recipient
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 1,
+#       "User": "golden",
+#       "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#       "ChatId": "chat~3~1",
+#       "Msg": {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 12,
+#         "Status": 0,                      0：unread; 1：read
+#         "MsgId": 1623087639086629252,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+###
+# 7. elon  rejects friend request
+
+POST https://tweettest.vog.media/vapi/vgr1/rejectfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "friend": 1,
+    "msg": "rejected."
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "reject friend",
+#     "Uid": 3,
+#     "Fid": 1,
+#     "MsgId": 1623089145424174114
+#   }
+# }
+
+
+###
+# 8. zac   get user private message list  -  after friend application is rejected
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 3,
+#       "User": "elon",
+#       "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#       "ChatId": "chat~1~3",
+#       "Msg": {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 14,
+#         "Status": 0,
+#         "MsgId": 1623089145424174114,
+#         "Msg": {
+#           "Msg": "rejected.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+###
+# 9. elon  get user private message list  -  after rejecting friend request
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 1,
+#       "User": "golden",
+#       "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#       "ChatId": "chat~3~1",
+#       "Msg": {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 14,
+#         "Status": 1,
+#         "MsgId": 1623089145424174114,
+#         "Msg": {
+#           "Msg": "rejected.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+
+###
+# 10. zac  add friends again
+
+POST https://tweettest.vog.media/vapi/vgr1/addfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "friend": 3,
+    "msg": "hello, elon"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "add friend",
+#     "Uid": 1,
+#     "Fid": 3,
+#     "MsgId": 1623089320714615951
+#   }
+# }
+
+
+
+###
+# 11. elon accept friend request
+
+POST https://tweettest.vog.media/vapi/vgr1/acceptfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "friend": 1,
+    "msg": "accepted."
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "accept friend",
+#     "Uid": 3,
+#     "Fid": 1,
+#     "MsgId": 1623089349654810521
+#   }
+# }
+
+
+
+###
+# 12. zac  get user private message list  -  after friend application is approved
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 3,
+#       "User": "elon",
+#       "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#       "ChatId": "chat~1~3",
+#       "Msg": {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 13,
+#         "Status": 0,
+#         "MsgId": 1623089349654810521,
+#         "Msg": {
+#           "Msg": "accepted.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+###
+# 13. elon get user private message list  -  after agreeing to friend application
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 1,
+#       "User": "golden",
+#       "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#       "ChatId": "chat~3~1",
+#       "Msg": {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 13,
+#         "Status": 1,
+#         "MsgId": 1623089349654810521,
+#         "Msg": {
+#           "Msg": "accepted.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+###
+# 14. zac  get user information  -  check again if it is a friend
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=3 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+#     "MyFriend": true,     each other is already friends
+
+
+###
+# 15. elon get user information  -  check again if it is a friend
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=1 HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+#     "MyFriend": true,     each other is already friends
+
+
+
+###
+# 16. zac  send message  -  zac send message to elon
+
+POST https://tweettest.vog.media/vapi/vgr1/sendmsg  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "friend": 3,
+    "msg": "my test msg from zac"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "send message",
+#     "Uid": 1,
+#     "Fid": 3,
+#     "MsgId": 1623089608433896118
+#   }
+# }
+
+
+###
+# 17. elon send message  -  elon send message to zac
+
+POST https://tweettest.vog.media/vapi/vgr1/sendmsg  HTTP/1.1
+Content-Type: application/json
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "friend": 1,
+    "msg": "my reply msg from elon"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "send message",
+#     "Uid": 3,
+#     "Fid": 1,
+#     "MsgId": 1623089687101663740
+#   }
+# }
+
+
+###
+# 18. zac  get the list of chat history with a friend  -  the chat history seen by zac
+
+GET https://tweettest.vog.media/vapi/vgr1/getchatmsglist?fid=3  HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Uid": 3,
+#     "User": "elon",
+#     "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#     "ChatId": "chat~1~3",
+#     "MsgList": [
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 11,
+#         "Status": 0,
+#         "MsgId": 1623087639086629252,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 14,
+#         "Status": 1,
+#         "MsgId": 1623089145424174114,
+#         "Msg": {
+#           "Msg": "rejected.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 11,
+#         "Status": 0,
+#         "MsgId": 1623089320714615951,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 13,
+#         "Status": 1,
+#         "MsgId": 1623089349654810521,
+#         "Msg": {
+#           "Msg": "accepted.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 15,
+#         "Status": 0,
+#         "MsgId": 1623089608433896118,
+#         "Msg": {
+#           "Msg": "my test msg from zac",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 15,
+#         "Status": 1,
+#         "MsgId": 1623089687101663740,
+#         "Msg": {
+#           "Msg": "my reply msg from elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     ]
+#   }
+# }
+
+
+
+###
+# 19. elon get the list of chat history with a friend  -  the chat history seen by elon
+
+GET https://tweettest.vog.media/vapi/vgr1/getchatmsglist?fid=1  HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Uid": 1,
+#     "User": "golden",
+#     "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#     "ChatId": "chat~3~1",
+#     "MsgList": [
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 12,
+#         "Status": 1,
+#         "MsgId": 1623087639086629252,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 14,
+#         "Status": 1,
+#         "MsgId": 1623089145424174114,
+#         "Msg": {
+#           "Msg": "rejected.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 12,
+#         "Status": 1,
+#         "MsgId": 1623089320714615951,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 13,
+#         "Status": 1,
+#         "MsgId": 1623089349654810521,
+#         "Msg": {
+#           "Msg": "accepted.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 15,
+#         "Status": 1,
+#         "MsgId": 1623089608433896118,
+#         "Msg": {
+#           "Msg": "my test msg from zac",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 15,
+#         "Status": 1,
+#         "MsgId": 1623089687101663740,
+#         "Msg": {
+#           "Msg": "my reply msg from elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     ]
+#   }
+# }
+
+
+###
+# 20. elon delete friends  -  elon deletes friends unilaterally
+
+POST https://tweettest.vog.media/vapi/vgr1/remfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "friend": 1
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "remove friend",
+#     "Uid": 3,
+#     "Fid": 1,
+#     "MsgId": 0
+#   }
+# }
+
+
+###
+# 21. zac  get user information  -  check again if you are a friend
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=3 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+#     "MyFriend": false,     no longer friends
+
+
+###
+# 22. elon get user information  -  check again if it is a friend
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=1 HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+#     "MyFriend": false,     no longer friends
+
+
+
+###
+# 23. zac  delete friends  -  zac also deletes friends and restores the initial state
+
+POST https://tweettest.vog.media/vapi/vgr1/remfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "friend": 3
+}
+

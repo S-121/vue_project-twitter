@@ -1,0 +1,2426 @@
+
+##########################################
+# 注册登录相关
+##########################################
+
+
+###
+# 用户登录
+# user支持username/email
+# pw需要前端先做加密处理
+# redirect_uri是非必要入参，用于重定向url
+# token有效期10分钟
+
+
+POST https://tweettest.vog.media/vapi/vgr1/login?redirect_uri=https://vog.media/  HTTP/1.1
+Content-Type: application/json
+
+{
+    "user": "zac",
+    "pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Code": "711015",     用于验证邮箱
+#     "Email": "ut***",     用于在前端显示邮箱提示
+#     "Token": "jqhcxqh205e2rv2s9k1qu1v8p7wa6spl"       用于confirm验证
+#   }
+# }
+
+
+
+###
+# 确认登录，确认注册，确认修改密码，确认修改邮箱
+# 登录返回的token有效期是90天
+
+POST https://tweettest.vog.media/vapi/vgr1/confirm  HTTP/1.1
+Content-Type: application/json
+
+{
+    "token": "jqhcxqh205e2rv2s9k1qu1v8p7wa6spl",
+    "code": "711015"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Redirect_uri": "https://vog.media/",     返回前面的重定向url
+#     "Token": "zac.o4im24qf9r0djqx9li2b8ko32jhcxkd1eanm2bufe554glrvce1yw5utx73zjap7"
+#   }
+# }
+
+
+
+###
+# 游客注册，游客登录
+# Key是一个不少于16位的字符串，标记唯一的机器ID
+# 后台会立即返回用户的token
+# 相同的key多次登录会返回同一个token
+# https://gitlab.vog.media/Phoenix/phoenix/issues/9  游客登录说明
+
+POST https://tweettest.vog.media/vapi/vgr1/guestreg  HTTP/1.1
+Content-Type: application/json
+
+{
+    "Key": "1234567890123456789"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Token": "bd39e6773fc19d72.hg2cfho42srn34rim4c0krvmqawmf6343r8le37gnmrkk1k57adgn10a0227dgo2"
+#   }
+# }
+
+
+
+###
+# 注册新用户
+# 用户名至少3个字符，只能包含0-9, a-z, A-Z，全网不可以重名
+# 密码加密后长度必须大于64位字符，其它的密码限制在前端完成，统一为至少8位，必须有字母和数字
+# displayname全网不可以重名
+
+
+POST https://tweettest.vog.media/vapi/vgr1/register?redirect_uri=https://vog.media/  HTTP/1.1
+Content-Type: application/json
+
+{
+    "Username": "abcedf",
+    "Email": "1@gmail.com",
+    "Pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+    "Displayname": "abc"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Code": "549514",         用于验证邮箱
+#     "Token": "kt6a9lwggz3pomhos5is25fkifznst5o"       用于confirm验证
+#   }
+# }
+
+
+###
+# 登出
+# 后台会销毁login token
+
+POST https://tweettest.vog.media/vapi/vgr1/logout HTTP/1.1
+Content-Type: application/json
+Authorization: token...
+
+
+
+###
+# 检查注册信息，此API暂时不要使用
+
+POST http://127.0.0.1:8011/vapi/vgr1/checkreg  HTTP/1.1
+Content-Type: application/json
+
+{
+    "Username": "007",
+    "Email": "gwg1357924680123@gmail.com",
+    "Pw": "493038362452ceec128386cebbff49c9cbaeedef855147c7b58d9312747b530c",
+    "Displayname": "abc"
+}
+
+
+
+##########################################
+# 用户基本信息相关
+##########################################
+
+
+
+###
+# 获取用户基本信息
+# 此方法用于用户的基本信息读取，与另一接口tweetuser不同，后者用于文章显示
+
+GET https://tweettest.vog.media/vapi/vgr1/userinfo  HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Uid": 1,
+#     "Username": "golden",
+#     "Email": "z@z.com",
+#     "DisplayName": "golden",
+#     "IsGroup": 1,                 >1是用户组
+#     "GroupLTw": 2,                用户组发帖限制，最少发帖
+#     "GroupLFol": 2,               用户组发帖限制，最少follower
+#     "Avatar48": "2021/03/26/bcl3oybldq15xl5w1mkyrmt1i8yujnvz_48.jpg",
+#     "Avatar96": "2021/03/26/bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#     "Avatar400": "2021/03/26/bcl3oybldq15xl5w1mkyrmt1i8yujnvz_400.jpg",
+#     "Description": "this is my channel",
+#     "BannerPic": "this is banner url"
+#   }
+# }
+
+
+###
+# 检查密码
+
+POST https://tweettest.vog.media/vapi/vgr1/checkpw  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+}
+
+
+###
+# 重置密码和修改密码
+# Email入参是支持email/username的
+# Pw入参是新密码，密码需要先加密
+# 重置密码流程：用户输入邮箱或用户名，发邮件给进入修改密码的链接，然后用这个API写入新密码
+# 修改密码流程：用户已经登录，输入旧密码，用checkpw验证，输入新密码，用这个API写入新密码
+# 注意：上面两个流程还需要进一步确认
+
+
+POST https://tweettest.vog.media/vapi/vgr1/resetpw  HTTP/1.1
+Content-Type: application/json
+
+{
+    "Email": "zac",
+    "Pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+
+}
+
+
+###
+# 更改邮箱
+
+POST https://tweettest.vog.media/vapi/vgr1/changemail  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Email": "z@z.com",
+    "Pw": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+}
+
+
+
+###
+# 更改显示名称
+
+POST https://tweettest.vog.media/vapi/vgr1/changedisplayname  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Displayname": "golden"
+}
+
+
+###
+# 更改用户名
+
+POST https://tweettest.vog.media/vapi/vgr1/changeusername  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Username": "golden"
+}
+
+
+###
+# 更改用户描述
+
+POST https://tweettest.vog.media/vapi/vgr1/changedescription  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Description": "this is my channel"
+}
+
+
+###
+# 更改banner
+
+POST https://tweettest.vog.media/vapi/vgr1/changebanner  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Banner": "this is banner url"
+}
+
+
+###
+# 更改用户头像
+# 头像地址需要取自upload
+
+POST https://tweettest.vog.media/vapi/vgr1/changeavatar  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "Avatar48": "2021/03/26/3wnuok51j0fnhrt469inwtef4mh1l623_48.jpg",
+    "Avatar96": "2021/03/26/3wnuok51j0fnhrt469inwtef4mh1l623_96.jpg",
+    "Avatar400": "2021/03/26/3wnuok51j0fnhrt469inwtef4mh1l623_400.jpg"
+}
+
+
+###
+# user变更为group
+
+POST https://tweettest.vog.media/vapi/vgr1/changetogroup  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# group变更为user
+
+POST https://tweettest.vog.media/vapi/vgr1/changetouser  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+###
+# 设置用户组发帖限制
+
+POST https://tweettest.vog.media/vapi/vgr1/setgroup HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "groupltw": 2,
+    "grouplfol": 2
+}
+
+
+
+###
+# 设置顶置贴
+# 入参toptw是帖子id
+
+POST https://tweettest.vog.media/vapi/vgr1/settoptw  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "toptw": "1234567890123456789"
+}
+
+
+
+
+##########################################
+# 推文获取相关
+##########################################
+
+
+###
+# 未登录状态下，游客访问时获取服务节点
+
+GET https://tweettest.vog.media/vapi/vgr1/hello HTTP/1.1
+
+
+# {
+#   "Code": 0,
+#   "Msg": "No token",
+#   "Body": {
+#     "Avatar": "https://uploadtest.vog.media/storage2/",       头像服务节点
+#     "Domain": "https://tweettest.vog.media",                  服务节点
+#     "OncetimeUser": "oncetimeoncetime.o1uijf5u5p04c2osra69ylq1o5h9ifrdn5mfxps8nzx2vuap7dxcczvfoi3wpe8a",  一次性用户token，只能查看推文，无法发送推文
+#     "TimeStamp": 1623025691           服务器时间，用于校对客户端时间
+#   }
+# }
+
+
+
+###
+# 登录状态下，获取服务节点
+
+GET https://tweettest.vog.media/vapi/vgr1/hello?token=zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd HTTP/1.1
+
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Avatar": "https://uploadtest.vog.media/storage2/",
+#     "Domain": "https://tweettest.vog.media",
+#     "OncetimeUser": "oncetimeoncetime.o1uijf5u5p04c2osra69ylq1o5h9ifrdn5mfxps8nzx2vuap7dxcczvfoi3wpe8a",
+#     "TimeStamp": 1623026743
+#   }
+# }
+
+
+
+###
+# 获取用户信息（获取自己的公开信息）
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+# Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "UserId": 1,
+#     "Username": "golden",
+#     "DisplayName": "golden",
+#     "Description": "this is my channel",
+#     "Avatar96": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#     "BannerPic": "https://pbs.twimg.com/profile_banners/56572394/1575746989/1500x500",
+#     "UserLevel": 0,                   默认0；7，8，9是管理员，仅用于后台内部使用，前台不会提供数据
+#     "IsGroup": 1,                     >0是用户组
+#     "GroupSrv": "S1",                 服务节点名称（只有用户组才有的信息）
+#     "GroupDomain": "https://tweettest.vog.media",     服务节点域名（只有用户组才有的信息）
+#     "GroupLTw": 2,                    用户组发帖限制（只有用户组才有的信息）
+#     "GroupLFol": 2,                   用户组发帖限制（只有用户组才有的信息）
+#     "ALive": 32416,                   用户最新发帖时间
+#     "Online": 1623027898,             用户最新在线时间
+#     "CreateTime": 1606560664,         用户的创建时间
+#     "TwCount": 277,                   用户发表的推文数量
+#     "FollowBy": 45,                   用户被多少人follow
+#     "FollowTo": 57,                   用户follow了多少人
+#     "Blocked": 0,                     用户屏蔽了多少人
+#     "TopTw": 0,                       用户的顶置帖子ID
+#     "Reported": 2,                    用户被举报的次数（仅用户自己可以查看）
+#     "FreezeTo": 1624589123,           用户被冻结截至时间（仅用户自己可以查看）
+#     "IFollowed": false,
+#     "FollowToMe": false,
+#     "IBlockHim": false,
+#     "MyFriend": false,
+#     "FWithMe": 0,
+#     "FWithMeList": null
+#   }
+# }
+
+
+
+###
+# 获取用户信息（获取其它用户的公开信息）
+# 如果对方已经屏蔽了自己，则返回错误信息
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=2 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "UserId": 2,
+#     "Username": "007",
+#     "DisplayName": "007",
+#     "Description": "007007",
+#     "Avatar96": "3wnuok51j0fnhrt469inwtef4mh1l623_96.jpg",
+#     "BannerPic": "https://pbs.twimg.com/profile_banners/56572394/1575746989/1500x500",
+#     "UserLevel": 0,                  默认0；7，8，9是管理员，仅用于后台，前台不会提供数据
+#     "IsGroup": 0,
+#     "GroupSrv": "",
+#     "GroupDomain": "",
+#     "GroupLTw": 0,
+#     "GroupLFol": 0,
+#     "ALive": 387135,
+#     "Online": 40363,
+#     "CreateTime": 1606560664,
+#     "TwCount": 384,
+#     "FollowBy": 16,
+#     "FollowTo": 10,
+#     "Blocked": 0,
+#     "TopTw": 1621702919682944095,
+#     "Reported": 0,
+#     "FreezeTo": 0,
+#     "IFollowed": true,                这个用户是否是我已经follow的
+#     "FollowToMe": true,               这个用户是否已经follow了我
+#     "IBlockHim": false,               这个用户是否已经被我屏蔽
+#     "MyFriend": false,                这个用户是否已经是我的好友(好友可以发私信)
+#     "FWithMe": 4,                     这个用户和我有多少个相同的follower
+#     "FWithMeList": [                  这个用户和我共同的follower列表（最多给3个）
+#       "007",
+#       "elon",
+#       "eden"
+#     ]
+#   }
+# }
+
+
+###
+# 同步用户信息到redis
+# 这是一个内部使用的API，用于当手工修改了用户基本信息后，同步用户信息到redis
+
+GET https://tweettest.vog.media/vapi/vgr1/updateuser?uid=1 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+###
+# sse连接home
+# TOKEN=login token
+# CHAGID=8位字符串，用于标识每一个连接的客户端，多次连接尽量保持一致
+# eventsource的连接方法是前端技术
+
+GET https://tweettest.vog.media/vapi/vgr1/stream/TOKEN/CHATID
+# var source1 = new EventSource(url);
+
+
+# 返回的信息类型包括：
+# Typ = "P" 心跳
+# Typ = "A" 广告
+# Typ = “E” 帖子统计更新
+# Typ = “N” 新通知提醒
+# Typ = “S” 原始推文
+# Typ = “T” 推文
+
+# 返回的媒体类型
+# MTyp = “V” 上传的视频
+# MTyp = “S” 上传的音频
+# MTyp = “L” 直播
+# MTyp = “M” 手机话筒录音
+# MTyp = “R” 内部文章
+# MTyp = “U” 外部文章URL
+
+###
+# sse连接某个group
+# eventsource的连接方法是前端技术
+
+GET https://tweettest.vog.media/vapi/vgr1/stream/TOKEN/CHATID?groupid=1
+# var source1 = new EventSource(url);
+
+
+
+###
+# 更改sse连接
+# chatid需要与stream相同
+# groupid = 0 连接Home
+# groupid > 0 连接group
+
+POST https://tweettest.vog.media/vapi/vgr1/streamgroup HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+     "chatid": "abcdefgh",
+     "groupid": 1
+}
+
+
+
+###
+# 获取用户组的服务节点
+# 连接group之前必须获取group的服务节点
+# group的域名在tweetuser接口中获取，如果返回空，则使用这个api获取group服务节点
+
+GET https://tweettest.vog.media/vapi/vgr1/groupdomain?groupid=1 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "GroupDomain": "https://tweettest.vog.media"      group的服务节点
+#   }
+# }
+
+
+
+###
+# 获取Home时间线
+
+GET https://tweettest.vog.media/vapi/vgr1/timeline HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "count": 20,              // 返回推文的数量
+#     "timeline": [             // 推文列表
+#       {
+#         "T": "1622996866571437415",       // 推文ID
+#         "Typ": "T",                       // 推文类型
+#         "Group": {                        // 用户组信息
+#           "Uid": 0,
+#           "User": "",
+#           "UserD": "",
+#           "UserA": ""
+#         },                                // 发帖用户信息
+#         "User": {
+#           "Uid": 3,
+#           "User": "elon",
+#           "UserD": "elon",
+#           "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg"
+#         },
+#         "Reply": null,                    // 帖子的回复人
+#         "ReUser": {                       // 转推的原文用户信息
+#           "Uid": 0,
+#           "User": "",
+#           "UserD": "",
+#           "UserA": "",
+#           "Followed": false
+#         },
+#         "Retw": "",                       // 转推的推文ID
+#         "Tw": "c4",                       // 推文内容
+#         "P": null,                        // 推文图片列表，最多4张图片
+#         "MTyp": "",                       // 推文媒体类型
+#         "Url": "",                        // 推文引用的url链接
+#         "St": 0,                          // 推文状态，0有效，1无效，2被警告（仅在用户组中存在这种状态）
+#         "Stat": {                         // 推文技术统计
+#           "Exposure": 0,
+#           "Viewer": 0,
+#           "ULike": 0,
+#           "Ret": 0,
+#           "Qot": 0,
+#           "Cot": 0
+#         },                                // 推文和本人有关的状态，例如本人是否点过赞
+#         "StatU": {
+#           "ViewerU": 0,
+#           "ULikeU": 0,
+#           "RetU": 0
+#         },
+#         "QotS": null,                     // 引用帖子的帖子内容
+#         "PatS": [                         // 父亲贴的帖子内容
+#           {
+#             "T": "1622995482315904188",
+#             "User": {
+#               "Uid": 1,
+#               "User": "golden",
+#               "UserD": "golden",
+#               "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg"
+#             },
+#             "Tw": "haha",
+#             "P": null,
+#             "MTyp": "",
+#             "Url": "",
+#             "St": 0,
+#             "Stat": {
+#               "Exposure": 0,
+#               "Viewer": 0,
+#               "ULike": 0,
+#               "Ret": 0,
+#               "Qot": 0,
+#               "Cot": 4
+#             },
+#             "StatU": {
+#               "ViewerU": 0,
+#               "ULikeU": 0,
+#               "RetU": 0
+#             }
+#           }
+#         ]
+#       }
+#     ],
+#     "users": 4       //涉及多少用户（不需要使用）
+#   }
+# }
+
+
+###
+# 获取Home时间线（指定截至时间）
+# 当第一次调取timeline后获得了Home列表，列表中最后一条推文的time就是这个接口的入参时间
+# 用于向下滑动的分页显示
+
+GET https://tweettest.vog.media/vapi/vgr1/timeline/1690000000 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+###
+# 获取用户推文列表
+# uid/user两个参数二选其一
+# category入参可选：空，article, media，分别代表取所有帖子，仅取文章，仅取媒体
+# timeto=截至时间，用于分页显示，用法和timeline接口一致
+# count=返回推文条数，默认20
+# 此api返回内容和timeline类似，但会稍有区别，例如没有用户组信息
+
+GET https://tweettest.vog.media/vapi/vgr1/usertw?uid=1&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# user参数例子
+# timeto=截至时间，用于分页显示，用法和timeline接口一致
+
+GET https://tweettest.vog.media/vapi/vgr1/usertw?user=golden&timeto=1815781974068082400&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# category=article，仅返回内部文章，包含转推的文章
+
+GET https://tweettest.vog.media/vapi/vgr1/usertw?uid=1&category=article&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# category=media，仅返回上传视频，上传音频，和直播；包含转推的媒体
+
+GET https://tweettest.vog.media/vapi/vgr1/usertw?uid=1&category=media&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+###
+# 获取用户组推文列表
+# uid/user两个参数二选其一
+# category入参可选：空，article, media，分别代表取所有帖子，仅取文章，仅取媒体
+# timeto=截至时间，用于分页显示，用法和timeline接口一致
+# count=返回推文条数，默认20
+# 如果用户不是组，如果有历史的组消息也会被返回
+
+GET https://tweettest.vog.media/vapi/vgr1/grouptw?uid=1&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# category=article，仅返回内部文章，包含转推的文章
+
+GET https://tweettest.vog.media/vapi/vgr1/grouptw?uid=1&category=article&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# category=media，仅返回上传视频，上传音频，和直播；包含转推的媒体
+
+GET https://tweettest.vog.media/vapi/vgr1/grouptw?uid=1&category=media&count=10 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# 获取group的活跃用户
+# 以最近发帖时间排序
+# 最多返回10个用户
+# 不包括用户组自己
+# 如果是查看自己，则不需要入参uid
+
+GET https://tweettest.vog.media/vapi/vgr1/groupactiveuser?uid=3 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 474,
+#       "User": "voguser3",
+#       "UserD": "voguser3",
+#       "UserA": ""
+#     },
+#     {
+#       "Uid": 470,
+#       "User": "newuser4",
+#       "UserD": "newuser4",
+#       "UserA": ""
+#     }
+#   ]
+# }
+
+
+###
+# 获取某个推文和它的所有跟帖
+# 入参是推文ID
+# start从1开始，count=返回回复贴的数量， 默认20
+# 此api返回内容和timeline类似，但会稍有区别，例如会返回更多的父亲贴的信息
+
+GET https://tweettest.vog.media/vapi/vgr1/get/1624914441615304471?count=20&start=1 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "T": "1624502095374983900",               主贴ID
+#     <主贴内容>
+#     "PatS": null,                             主贴的父亲贴列表
+#     "CotS": [                                 跟帖，引用贴，转贴列表
+#       {
+#         ...
+#         "Cotw": "1624502095374983900",        主贴的子贴
+#         ...
+#       },
+#       {
+#         ...
+#         "QotS": [                             主贴被引用
+#           {
+#             "T": "1624502095374983900",
+#             ...
+#           }
+#         ]
+#       },
+#       {
+#         ...
+#         "Retw": "1624502095374983900",        主贴被转推
+#         ...
+#       }
+#     ],
+#     "QotS": null                              主贴的引用贴列表
+#   }
+# }
+
+
+
+###
+# 检查帖子是否已经生效
+# 这是压力测试才会使用的内部API
+
+GET https://tweettest.vog.media/vapi/vgr1/check/1614882638820147906 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# 获取用户通知列表
+# start从1开始，count=返回条数，默认20
+
+GET https://tweettest.vog.media/vapi/vgr1/ulog?start=1&count=20 HTTP/1.1
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Ids": [                        推文列表
+#         "1622996866775009111"
+#       ],
+#       "Resps": [                      对方用户信息
+#         {
+#           "Uid": 1,
+#           "User": "golden",
+#           "UserD": "golden",
+#           "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg"
+#         }
+#       ],
+#       "Uid": 1,
+#       "Act": 3,        通知类型：1关注 2转发 3评论 4引用 5喜欢; 消息相关：11添加好友 12有添加好友请求 13同意好友申请 14 拒绝好友申请 15有新私信
+#       "Msg": {
+#           帖子内容或私信内容
+#       }
+#       "Unread": true   true:未读通知; false:已读通知
+#     }
+#   ]
+# }
+
+
+###
+# 获取用户未读通知计数
+# 用于用户进入页面和多用户登录后的新通知提示
+# 返回Body即是未读通知计数
+# 当改用户调用ulog接口后，再次调用unreadulog接口，返回的计数会被清零，代表消息已读
+
+GET https://tweettest.vog.media/vapi/vgr1/unreadulog HTTP/1.1
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": 2
+# }
+
+
+##########################################
+# 推文发送相关
+##########################################
+
+
+###
+# 发送文字消息
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "tweet": "hello",
+    "device": "web"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "tweet",
+#     "T": "1623040975041013264"        帖子ID
+#   }
+# }
+
+
+###
+# 发送到某个用户组
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "groupid": 1,
+    "tweet": "hello7",
+    "device": "web"
+}
+
+
+
+###
+# 发送文字+图片
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "pic": ["pic1", "pic2", "pic3", "pic4"],
+    "tweet": "hello7",
+    "device": "web"
+}
+
+
+
+###
+# 发送文章，视频，音频
+# MTyp = “V” 上传的视频
+# MTyp = “S” 上传的音频
+# MTyp = “L” 直播
+# MTyp = “M” 手机话筒录音
+# MTyp = “R” 内部文章
+# MTyp = “U” 外部文章URL
+
+POST  https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "groupid": 0,
+    "tweet": "hello8",
+    "mtyp": "V",
+    "url": "videohahahaurl",
+    "device": "web"
+}
+
+
+###
+# 转推推文
+# 原推文必须是有效的
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "retweet": "1624914441615304471",
+    "device": "web"
+}
+
+
+###
+# 引用推文并评论
+# 原推文必须是有效的
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+# Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "qotweet": "1624914441615304471",
+    "tweet": "007引用原帖A",
+    "device": "web"
+}
+
+
+###
+# 回复推文
+# 被回复的推文必须是有效的
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "cotweet": "1624914441615304471",
+    "tweet": "跟帖1",
+    "reply": [1],
+    "device": "web"
+}
+
+
+###
+# 回复推文带上其他回复人
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "cotweet": "1622347555150279800",
+    "tweet": "跟帖1",
+    "reply": [1,2,3,4],
+    "device": "web"
+}
+
+
+###
+# 观看一个推文（此方法没有使用，暂时保留）
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+{
+    "vitweet": "1616236762347263100",
+    "device": "web"
+}
+
+
+###
+# 喜欢一个推文
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "litweet": "1616345923733001100",
+    "device": "web"
+}
+
+
+###
+# 删除推文（只能自己删除）
+# 推文作者必须和token保持一致
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "block": "1613371342213595400",
+    "device": "web"
+}
+
+
+###
+# 警告一个推文
+# 只能是组的所有者警告组内推文
+
+POST https://tweettest.vog.media/vapi/vgr1/send HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "caution": "1613371342213595400",
+    "device": "web"
+}
+
+
+
+##########################################
+# 关注和屏蔽相关
+##########################################
+
+
+###
+# 用户的关注清单
+# uid=查询的目标用户，如果uid省略就是返回token对应的用户
+# start从1开始，count=返回条数，默认50
+
+GET https://tweettest.vog.media/vapi/vgr1/followto?uid=2&start=1&count=50 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "UserId": 1,
+#       "Username": "golden",
+#       "DisplayName": "golden",
+#       "Description": "this is my channel",
+#       "Avatar96": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#       "BannerPic": "https://pbs.twimg.com/profile_banners/56572394/1575746989/1500x500",
+#       "IsGroup": 1,
+#       "GroupSrv": "S1",
+#       "GroupDomain": "https://tweettest.vog.media",
+#       "GroupLTw": 2,
+#       "GroupLFol": 2,
+#       "ALive": 1418,
+#       "Online": 9746,
+#       "CreateTime": 1606560664,
+#       "TwCount": 278,
+#       "FollowBy": 10,
+#       "FollowByA": 10,
+#       "FollowTo": 109,
+#       "FollowToA": 209,
+#       "LTw": "this is last post content",
+#       "LArticle": 3,
+#       "TopTw": 123,
+#       "Followed": false,
+#       "Blocked": false
+#     }
+#   ]
+# }
+
+
+
+###
+# 用户的关注者清单
+# uid=查询的目标用户，如果uid省略就是返回token对应的用户
+# start从1开始，count=返回条数，默认20
+# 返回内容同followto接口
+
+GET https://tweettest.vog.media/vapi/vgr1/followby?uid=320&start=1&count=20 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# 添加关注
+
+POST https://tweettest.vog.media/vapi/vgr1/addfollow HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "fol": 2
+}
+
+
+###
+# 取消关注
+
+POST https://tweettest.vog.media/vapi/vgr1/remfollow HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "fol": 2
+}
+
+
+###
+# 用户的屏蔽清单
+# uid=查询的目标用户，如果uid省略就是返回token对应的用户
+# start从1开始，count=返回条数，默认50
+# 返回内容同followto接口
+
+GET https://tweettest.vog.media/vapi/vgr1/blocklist?uid=2start=1&count=50 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# 屏蔽用户
+
+POST https://tweettest.vog.media/vapi/vgr1/addblock HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "blk": 2
+}
+
+
+###
+# 取消屏蔽
+
+POST https://tweettest.vog.media/vapi/vgr1/remblock HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "blk": 2
+}
+
+
+
+##########################################
+# 用户推荐相关
+##########################################
+
+###
+# 用户推荐列表
+
+GET https://tweettest.vog.media/vapi/vgr1/reco HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "UserId": 418,
+#       "Username": "user_55pmislq",
+#       "DisplayName": "Guest_islq",
+#       "Description": "",
+#       "Avatar48": "",
+#       "Avatar96": "",
+#       "TwCount": 30,
+#       "FollowBy": 4
+#     }
+#   ]
+# }
+
+
+###
+# 获取用户推荐，保留，暂未使用
+
+GET http://127.0.0.1:8011/vapi/vgr1/userreco HTTP/1.1
+Authorization: 100.12xboz04qku0hxb2jbs88h6znxlizrlrlku32xwpzdc1sp2yk4qizxyklnc23ufb
+
+
+###
+# 设置用户推荐，保留，暂未使用
+
+POST http://127.0.0.1:8011/vapi/vgr1/setuserreco HTTP/1.1
+Authorization: 100.12xboz04qku0hxb2jbs88h6znxlizrlrlku32xwpzdc1sp2yk4qizxyklnc23ufb
+
+{
+    "recos" : [
+        {
+            "recouserid": 2,
+            "order": 1
+        }, {
+            "recouserid": 3,
+            "order": 2
+        }, {
+            "recouserid": 4,
+            "order": 3
+        }
+    ]
+}
+
+
+
+##########################################
+# 搜索相关
+##########################################
+
+###
+# 搜索用户
+# s=搜索内容
+# start从1开始，count=返回条数，默认10
+
+GET https://tweettest.vog.media/vapi/vgr1/searchuser?s=key&start=1&count=10
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Result": [
+#       {
+#         "UserId": 236,
+#         "Username": "tianjinkeyou",
+#         "DisplayName": "GM09",
+#         "Description": ":-)",
+#         "Avatar96": "",
+#         "BannerPic": "",
+#         "IsGroup": 0,
+#         "GroupSrv": "",
+#         "GroupDomain": "",
+#         "GroupLTw": 0,
+#         "GroupLFol": 0,
+#         "ALive": -62135596800,
+#         "Online": 0,
+#         "CreateTime": 1606560875,
+#         "TwCount": 0,
+#         "FollowBy": 0,
+#         "FollowTo": 0,
+#         "Blocked": 0,
+#         "TopTw": 0
+#       }
+#     ],
+#     "Total": 1
+#   }
+# }
+
+
+###
+# 搜索帖子
+# start从1开始，count=返回条数，默认10
+# s=搜索内容
+
+GET https://tweettest.vog.media/vapi/vgr1/searchtweet?s=test&start=1&count=10
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Result": [
+#       {
+#         "T": "1622643257170371053",
+#         "Group": {
+#           "Uid": 0,
+#           "User": "",
+#           "UserD": "",
+#           "UserA": ""
+#         },
+#         "User": {
+#           "Uid": 4,
+#           "User": "eden",
+#           "UserD": "eden",
+#           "UserA": "ilvlrm0c571256ebyv7ir89u1xhsakgd_96.jpg"
+#         },
+#         "Reply": null,
+#         "ReUser": {
+#           "Uid": 0,
+#           "User": "",
+#           "UserD": "",
+#           "UserA": "",
+#           "Followed": false
+#         },
+#         "Retw": "",
+#         "Tw": "\u003cspan style='color: red;'\u003etest\u003c/span\u003e send",
+#         "P": null,
+#         "MTyp": "",
+#         "Url": "",
+#         "St": 0,
+#         "Stat": {
+#           "Exposure": 0,
+#           "Viewer": 0,
+#           "ULike": 0,
+#           "Ret": 0,
+#           "Qot": 0,
+#           "Cot": 0
+#         },
+#         "StatU": {
+#           "ViewerU": 0,
+#           "ULikeU": 0,
+#           "RetU": 0
+#         },
+#         "QotS": null,
+#         "PatS": null
+#       }
+#     ],
+#     "Total": 82           //结果条数
+#   }
+# }
+
+
+###
+# 搜索文章
+# start从1开始，count=返回条数，默认10
+# s=搜索内容
+# 返回内容同搜索文章
+
+GET https://tweettest.vog.media/vapi/vgr1/searcharticle?s=test&start=1&count=10
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# 手工创建索引，暂时不需要使用
+
+POST http://127.0.0.1:8011/vapi/vgr1/indextweet
+Content-Type: application/json
+
+{
+    "id": 1232,
+    "tweet": "miles guo是骗子？应该是的"
+}
+
+
+###
+# 手工创建索引，暂时不需要使用
+
+POST http://127.0.0.1:8011/vapi/vgr1/indexuser
+Content-Type: application/json
+
+{
+    "id": 1,
+    "username": "abc121",
+    "displayname": "zac",
+    "description": "我是软件工程师zac"
+}
+
+
+
+##########################################
+# bookmark相关
+##########################################
+
+###
+# 添加bookmark
+
+POST https://tweettest.vog.media/vapi/vgr1/addbookmark  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "T": "1618073907813772044"
+}
+
+###
+# 移除bookmark
+
+POST https://tweettest.vog.media/vapi/vgr1/rembookmark  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "T": "1618077860619490208"
+}
+
+
+
+###
+# 移除所有bookmark
+
+POST https://tweettest.vog.media/vapi/vgr1/remallbookmark  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+###
+# 读取bookmark列表
+# start从1开始，count=返回条数，默认10
+# 返回同usertw
+
+GET https://tweettest.vog.media/vapi/vgr1/getbookmark?start=1&count=10
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+
+##########################################
+# report相关
+##########################################
+
+
+###
+# 举报帖子
+# T是要举报的帖子ID
+# RType目前只支持"1"和"2"
+# "1" = "It contents sensitive photo, video, audio, etc."
+# "2" = "It is abusive or harmful to others."
+# 自己不可以举报自己的帖子
+# 转推不能举报
+
+POST https://tweettest.vog.media/vapi/vgr1/report HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "T": "1624914636998383528",
+    "RType": "2"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "It contents sensitive photo, video, audio, etc.",     举报类别的描述
+#     "T": "1624502095374983900"
+#   }
+# }
+
+
+###
+# 处罚用户
+# 必须是管理员用户才能进行处罚
+# Rid是举报ID
+# PLevel取值范围：1-6，9
+# 1 = "Delete Post"
+# 2 = "Delete Post and Freeze 1 hour"
+# 3 = "Delete Post and Freeze 1 day"
+# 4 = "Delete Post and Freeze 7 days"
+# 5 = "Delete Post and Freeze 30 days"
+# 6 = "Delete Post and Freeze 1 year"
+# 7 = "Delete Post and Freeze forever"
+# 调用这个接口后，用户会根据处罚级别被冻结，帖子会被标记删除
+
+
+POST https://tweettest.vog.media/vapi/vgr1/punish HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "RId": 3,
+    "PLevel": 2
+}
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "Delete Post && Freeze 1 day",         处罚描述
+#     "T": "1624672053"                             冻结截至时间
+#   }
+# }
+
+
+###
+# 列出举报历史
+# count默认20
+
+GET https://tweettest.vog.media/vapi/vgr1/getreport?start=1&count=20 HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "RId": 2,                          举报ID
+#       "RUserId": 1,                      举报人（仅管理员显示）
+#       "RTime": 1624570562,               举报时间
+#       "RType": "1",                      举报类别
+#       "RReason": "It contents sensitive photo, video, audio, etc.",   举报类别描述
+#       "Punish": "Delete Post && Freeze 1 hour",                       处罚结果
+#       "FreezeTo": 1624589123,            冻结截至时间，如果是0代表不冻结
+#       "OpUser": "golden",                处罚操作人（仅管理员显示）
+#       "OpTime": 1624585523,              处罚操作时间
+#       "Post": {                            推文内容
+#         "T": "1624503251218453200",
+#         "User": {
+#           "Uid": 3,
+#           "User": "elon",
+#           "UserD": "elon",
+#           "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg"
+#         },
+#         "Tw": "elon quote post",
+#         "P": null,
+#         "MTyp": "",
+#         "Url": "",
+#         "St": 1                           帖子的删除标记，需要显示出来
+#       }
+#     },
+#     {
+#       "RId": 3,
+#       "RUserId": 1,
+#       "RTime": 1624570562,
+#       "RType": "2",
+#       "RReason": "It is abusive or harmful to others.",
+#       "Punish": "",                       代表没有处罚
+#       "FreezeTo": 0,
+#       "OpUser": "",
+#       "OpTime": 0,
+#       "Post": {
+#         "T": "1624503251218453200",
+#         "User": {
+#           "Uid": 3,
+#           "User": "elon",
+#           "UserD": "elon",
+#           "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg"
+#         },
+#         "Tw": "elon quote post",
+#         "P": null,
+#         "MTyp": "",
+#         "Url": "",
+#         "St": 0
+#       }
+#     }
+#   ]
+# }
+
+
+
+###
+# 管理员列出举报历史
+# token必须是管理员
+
+GET https://tweettest.vog.media/vapi/vgr1/getreport?uid=3&start=1&count=20 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+
+##########################################
+# article相关
+##########################################
+
+
+###
+# 新建文章
+# pic是文字形象图片的地址
+
+POST https://tweettest.vog.media/vapi/vgr1/savearticle  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "title": "this is zac title",
+    "excerpt": "this is zac expert",
+    "content": "this is zac article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content",
+    "pic": "this is pic address"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "article": "emjlkfgx8n3be2kl",        文章hash
+#     "articleid": 55224                    文章id
+#   }
+# }
+
+
+###
+# 更新文章
+# key是文章hash
+# 已经发布7天的文章，不能被修改
+
+POST https://tweettest.vog.media/vapi/vgr1/savearticle  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "article": "emjlkfgx8n3be2kl",
+    "title": "this is title",
+    "excerpt": "this is expert",
+    "content": "this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content",
+    "pic": "this is pic address"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "article": "emjlkfgx8n3be2kl",
+#     "articleid": 55224
+#   }
+# }
+
+
+
+###
+# 发布文章
+# 发布文章的流程：先发送推文，包含文章永久链接，然后再调这个api
+# 入参tweetid=推文ID
+# content至少100个字符（后续根据需要调整）
+# 已发布的文章，不能再次发布
+# 已发布的文章，如果帖子被删除，会返回未发布状态，可以重新发布，但需要新建帖子
+
+POST https://tweettest.vog.media/vapi/vgr1/publisharticle  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "tweetid": "1618077905059391489",
+    "article": "emjlkfgx8n3be2kl"
+}
+
+
+###
+# 主动阅读文章，统计+1
+# 入参是文章hash
+
+POST https://tweettest.vog.media/vapi/vgr1/viewarticle/emjlkfgx8n3be2kl  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+###
+# 读取文章
+# key是文章hash
+# 如果文章的推文被标记删除，状态会返回未发布
+
+GET https://tweettest.vog.media/vapi/vgr1/article/emjlkfgx8n3be2kl  HTTP/1.1
+Content-Type: application/json
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "ArticleId": 55224,
+#     "Article": "emjlkfgx8n3be2kl",
+#     "UserId": 1,
+#     "Author": "golden",
+#     "Title": "this is title",
+#     "Excerpt": "this is expert",
+#     "Content": "this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content, this is article content",
+#     "TweetId": "1618077905059391489",     关联的推文ID，未发表为空
+#     "PublishTime": 1623083157,            未发表为0
+#     "PublishPastT": 118,                  未发表为0
+#     "CreateTime": 1623081421,             文章创建时间
+#     "CreatePastT": 1482,
+#     "UpdateTime": 1623081421,             文章最新修改时间
+#     "UpdatePastT": 1482,
+#     "Pic": "this is pic address",
+#     "Status": 0,                          0未发布；1已发布；例外情况是如果推文被标记删除，状态会返回未发布
+#     "ViewCount": 0,                       主动阅读次数
+#     "Exposure": 0,                        关联推文曝光量统计
+#     "Ulike": 0,                           关联推文点赞统计
+#     "Quote": 0                            关联推文被转推和引用的统计
+#   }
+# }
+
+
+
+###
+# 读取用户文章列表
+# start从1开始，count=返回条数，默认10
+# 返回和article接口基本一致（不包括文章内容），用于列表显示
+# 仅返回自己写的文章
+# 如果文章的推文被标记删除，状态会返回未发布
+
+GET https://tweettest.vog.media/vapi/vgr1/articles?start=1&count=10  HTTP/1.1
+
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+###
+# 推荐文章列表
+# start从1开始，count=返回条数，默认10
+# 返回和article接口基本一致，用于列表显示
+# 优先显示本人follow的用户的文章，再从文章列表中选择最新的文章
+
+GET https://tweettest.vog.media/vapi/vgr1/recoarticles?start=1&count=2  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+
+##########################################
+# 私信相关
+##########################################
+
+# 以下模拟整个检查好友，添加好友，拒绝好友，同意好友，互相发送消息，删除好友的全部流程
+# 1. zac   检查和对方是否互为好友
+# 2. zac   添加好友
+# 3. zac   检查是否已经添加成功 - 此时对方未确认
+# 4. elon  检查对方的好友状态
+# 5. zac   获取用户私信列表  -  好友申请发送方
+# 6. elon  获取用户私信列表  -  好友申请接收方
+# 7. elon  拒绝好友请求
+# 8. zac   获取用户私信列表  -  好友申请被拒绝后
+# 9. elon  获取用户私信列表  -  拒绝好友申请后
+# 10. zac  再次添加好友
+# 11. elon 接受好友请求
+# 12. zac  获取用户私信列表  -  好友申请被同意后
+# 13. elon 获取用户私信列表  -  同意好友申请后
+# 14. zac  获取用户信息 - 再次检查是否是好友
+# 15. elon 获取用户信息 - 再次检查是否是好友
+# 16. zac  发送消息  -  zac发送消息给elon
+# 17. elon 发送消息  -   elon发送消息给zac
+# 18. zac  获取与某个好友的聊天记录列表  -   zac看到的聊天记录
+# 19. elon 获取与某个好友的聊天记录列表  -   elon看到的聊天记录
+# 20. elon 删除好友  -   elon单方面删除好友
+# 21. zac  获取用户信息 - 再次检查是否是好友
+# 22. elon 获取用户信息 - 再次检查是否是好友
+# 23. zac 删除好友  -   zac也删除好友，回复最初始状态
+
+
+
+###
+# 1. 获取用户信息 - 检查是否是互为好友
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=3 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "UserId": 3,
+#     "Username": "elon",
+#     "DisplayName": "elon",
+#     "Description": "elonelonelon",
+#     "Avatar96": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#     "BannerPic": "https://pbs.twimg.com/profile_banners/56572394/1575746989/1500x500",
+#     "IsGroup": 1,
+#     "GroupSrv": "",
+#     "GroupDomain": "",
+#     "GroupLTw": 0,
+#     "GroupLFol": 0,
+#     "ALive": 42,
+#     "Online": 822,
+#     "CreateTime": 1606560664,
+#     "TwCount": 585,
+#     "FollowBy": 17,               被多少人follow
+#     "FollowByA": 17,              被多少人follow（仅近期活跃人数）
+#     "FollowTo": 29,               follow了多少人
+#     "FollowToA": 29,              follow了多少人（仅近期活跃人数）
+#     "Blocked": 1,
+#     "LTw": "this is last post content",
+#     "LArticle": 0,                最后一篇文字的id
+#     "TopTw": 1621967014796176262,
+#     "IFollowed": true,
+#     "FollowToMe": true,
+#     "IBlockHim": false,
+#     "MyFriend": false,            这里确认还不是好友
+#     "FWithMe": 3,
+#     "FWithMeList": [
+#       "007",
+#       "eden",
+#       "yyy123"
+#     ]
+#   }
+# }
+
+
+###
+# 2. 添加好友
+# msg是用户添加的打招呼msg
+
+POST https://tweettest.vog.media/vapi/vgr1/addfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "friend": 3,
+    "msg": "hello, elon"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "add friend",
+#     "Uid": 1,
+#     "Fid": 3,
+#     "MsgId": 1623087639086629252
+#   }
+# }
+
+
+###
+# 3. 获取用户信息 - 检查是否是好友
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=3 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+#     "MyFriend": false,            返回还不是好友（此时对方还未确认）
+
+
+###
+# 4. 获取用户信息 - 检查对方的好友状态
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=1 HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+#    "MyFriend": false,            返回还不是好友
+
+
+
+###
+# 5. 获取用户私信列表  -  好友申请发送方
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 3,
+#       "User": "elon",
+#       "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#       "ChatId": "chat~1~3",
+#       "Msg": {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 11,
+#         "Status": 1,                      0：未读；1：已读
+#         "MsgId": 1623087639086629252,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+###
+# 6. 获取用户私信列表  -  好友申请接收方
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 1,
+#       "User": "golden",
+#       "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#       "ChatId": "chat~3~1",
+#       "Msg": {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 12,
+#         "Status": 0,                      0：未读；1：已读
+#         "MsgId": 1623087639086629252,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+###
+# 7. 拒绝好友请求
+
+POST https://tweettest.vog.media/vapi/vgr1/rejectfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "friend": 1,
+    "msg": "rejected."
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "reject friend",
+#     "Uid": 3,
+#     "Fid": 1,
+#     "MsgId": 1623089145424174114
+#   }
+# }
+
+
+###
+# 8. 获取用户私信列表  -  好友申请被拒绝后
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 3,
+#       "User": "elon",
+#       "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#       "ChatId": "chat~1~3",
+#       "Msg": {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 14,
+#         "Status": 0,
+#         "MsgId": 1623089145424174114,
+#         "Msg": {
+#           "Msg": "rejected.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+###
+# 9. 获取用户私信列表  -  拒绝好友申请后
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 1,
+#       "User": "golden",
+#       "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#       "ChatId": "chat~3~1",
+#       "Msg": {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 14,
+#         "Status": 1,
+#         "MsgId": 1623089145424174114,
+#         "Msg": {
+#           "Msg": "rejected.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+
+###
+# 10. 添加好友  -  再次添加好友
+
+POST https://tweettest.vog.media/vapi/vgr1/addfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "friend": 3,
+    "msg": "hello, elon"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "add friend",
+#     "Uid": 1,
+#     "Fid": 3,
+#     "MsgId": 1623089320714615951
+#   }
+# }
+
+
+
+###
+# 11. 接受好友请求
+
+POST https://tweettest.vog.media/vapi/vgr1/acceptfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "friend": 1,
+    "msg": "accepted."
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "accept friend",
+#     "Uid": 3,
+#     "Fid": 1,
+#     "MsgId": 1623089349654810521
+#   }
+# }
+
+
+
+###
+# 12. 获取用户私信列表  -  好友申请被同意后
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 3,
+#       "User": "elon",
+#       "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#       "ChatId": "chat~1~3",
+#       "Msg": {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 13,
+#         "Status": 0,
+#         "MsgId": 1623089349654810521,
+#         "Msg": {
+#           "Msg": "accepted.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+
+###
+# 13. 获取用户私信列表  -  同意好友申请后
+
+GET https://tweettest.vog.media/vapi/vgr1/getusermsglist  HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": [
+#     {
+#       "Uid": 1,
+#       "User": "golden",
+#       "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#       "ChatId": "chat~3~1",
+#       "Msg": {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 13,
+#         "Status": 1,
+#         "MsgId": 1623089349654810521,
+#         "Msg": {
+#           "Msg": "accepted.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+###
+# 14. 获取用户信息 - 再次检查是否是好友
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=3 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+#     "MyFriend": true,     已经是互为好友
+
+
+###
+# 15. 获取用户信息 - 再次检查是否是好友
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=1 HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+#     "MyFriend": true,     已经是互为好友
+
+
+
+###
+# 16. 发送消息  -  zac发送消息给elon
+
+POST https://tweettest.vog.media/vapi/vgr1/sendmsg  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "friend": 3,
+    "msg": "my test msg from zac"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "send message",
+#     "Uid": 1,
+#     "Fid": 3,
+#     "MsgId": 1623089608433896118
+#   }
+# }
+
+
+###
+# 17. 发送消息  -   elon发送消息给zac
+
+POST https://tweettest.vog.media/vapi/vgr1/sendmsg  HTTP/1.1
+Content-Type: application/json
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "friend": 1,
+    "msg": "my reply msg from elon"
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "send message",
+#     "Uid": 3,
+#     "Fid": 1,
+#     "MsgId": 1623089687101663740
+#   }
+# }
+
+
+###
+# 18. 获取与某个好友的聊天记录列表  -   zac看到的聊天记录
+
+GET https://tweettest.vog.media/vapi/vgr1/getchatmsglist?fid=3  HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Uid": 3,
+#     "User": "elon",
+#     "UserA": "ra9ag84460upyr5gkeyxtv1tqhcwt253_96.jpg",
+#     "ChatId": "chat~1~3",
+#     "MsgList": [
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 11,
+#         "Status": 0,
+#         "MsgId": 1623087639086629252,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 14,
+#         "Status": 1,
+#         "MsgId": 1623089145424174114,
+#         "Msg": {
+#           "Msg": "rejected.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 11,
+#         "Status": 0,
+#         "MsgId": 1623089320714615951,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 13,
+#         "Status": 1,
+#         "MsgId": 1623089349654810521,
+#         "Msg": {
+#           "Msg": "accepted.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 15,
+#         "Status": 0,
+#         "MsgId": 1623089608433896118,
+#         "Msg": {
+#           "Msg": "my test msg from zac",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 15,
+#         "Status": 1,
+#         "MsgId": 1623089687101663740,
+#         "Msg": {
+#           "Msg": "my reply msg from elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     ]
+#   }
+# }
+
+
+
+###
+# 19. 获取与某个好友的聊天记录列表  -   elon看到的聊天记录
+
+GET https://tweettest.vog.media/vapi/vgr1/getchatmsglist?fid=1  HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Uid": 1,
+#     "User": "golden",
+#     "UserA": "bcl3oybldq15xl5w1mkyrmt1i8yujnvz_96.jpg",
+#     "ChatId": "chat~3~1",
+#     "MsgList": [
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 12,
+#         "Status": 1,
+#         "MsgId": 1623087639086629252,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 14,
+#         "Status": 1,
+#         "MsgId": 1623089145424174114,
+#         "Msg": {
+#           "Msg": "rejected.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 12,
+#         "Status": 1,
+#         "MsgId": 1623089320714615951,
+#         "Msg": {
+#           "Msg": "hello, elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 13,
+#         "Status": 1,
+#         "MsgId": 1623089349654810521,
+#         "Msg": {
+#           "Msg": "accepted.",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 1,
+#         "Fid": 3,
+#         "Act": 15,
+#         "Status": 1,
+#         "MsgId": 1623089608433896118,
+#         "Msg": {
+#           "Msg": "my test msg from zac",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       },
+#       {
+#         "Uid": 3,
+#         "Fid": 1,
+#         "Act": 15,
+#         "Status": 1,
+#         "MsgId": 1623089687101663740,
+#         "Msg": {
+#           "Msg": "my reply msg from elon",
+#           "Pic": "",
+#           "MTyp": "",
+#           "Url": ""
+#         }
+#       }
+#     ]
+#   }
+# }
+
+
+
+###
+# 20. 删除好友  -   elon单方面删除好友
+
+POST https://tweettest.vog.media/vapi/vgr1/remfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+{
+    "friend": 1
+}
+
+
+# {
+#   "Code": 0,
+#   "Msg": "",
+#   "Body": {
+#     "Act": "remove friend",
+#     "Uid": 3,
+#     "Fid": 1,
+#     "MsgId": 0
+#   }
+# }
+
+
+###
+# 21. 获取用户信息 - 再次检查是否是好友
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=3 HTTP/1.1
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+#     "MyFriend": false,     已经不再是好友
+
+
+###
+# 22. 获取用户信息 - 再次检查是否是好友
+
+GET https://tweettest.vog.media/vapi/vgr1/tweetuser?uid=1 HTTP/1.1
+Authorization: elon.9u4hnhed6m5ii6jvf7l7q4dpkektthy8kutf9j14uulkaw4k0n2rmzt0qpylq4yz
+
+#     "MyFriend": false,     已经不再是好友
+
+
+
+###
+# 23. 删除好友  -   zac也删除好友，回复最初始状态
+
+POST https://tweettest.vog.media/vapi/vgr1/remfriend  HTTP/1.1
+Content-Type: application/json
+Authorization: zac.dggx6miig5b86k5ui1ibr8biix6nqtvixc5hdvh6rodoebhdqxs5tkko10g65dvd
+
+{
+    "friend": 3
+}
+
